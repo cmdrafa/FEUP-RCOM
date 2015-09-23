@@ -5,6 +5,8 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
 
 #define BAUDRATE B38400
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
@@ -17,7 +19,7 @@ int main(int argc, char** argv)
 {
     int fd,c, res;
     struct termios oldtio,newtio;
-    char buf[255];
+    char buf[255] = "";
 
     if ( (argc < 2) || 
   	     ((strcmp("/dev/ttyS0", argv[1])!=0) && 
@@ -69,13 +71,20 @@ int main(int argc, char** argv)
     }
 
     printf("New termios structure set\n");
-
+	
 
     while (STOP==FALSE) {       /* loop for input */
       res = read(fd,buf,255);   /* returns after 5 chars have been input */
       buf[res]=0;               /* so we can printf... */
       printf(":%s:%d\n", buf, res);
-      if (buf[0]=='z') STOP=TRUE;
+
+      int n = 0;
+      while (n < 5)
+      {
+         if (buf[n]=='\0') STOP=TRUE;
+         n++;
+      }
+	 
     }
 
 
