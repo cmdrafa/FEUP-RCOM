@@ -5,9 +5,11 @@
 #include <fcntl.h>
 #include <termios.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
 
-#define BAUDRATE B38400
-#define MODEMDEVICE "/dev/ttyS1"
+#define BAUDRATE B9600
+#define MODEMDEVICE "/dev/ttyS4"
 #define _POSIX_SOURCE 1 /* POSIX compliant source */
 #define FALSE 0
 #define TRUE 1
@@ -80,6 +82,8 @@ int main(int argc, char** argv)
     
     /*testing*/
     buf[25] = '\n';
+    buf[30] = '\0';
+
     
     res = write(fd,buf,255);   
     printf("%d bytes written\n", res);
