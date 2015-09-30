@@ -80,7 +80,7 @@
      
      
             printf("Message to be sent: ");
-        gets(buf);
+        fgets(buf, sizeof(char) * 255, stdin);
             buf[(unsigned)strlen(buf)] = '\0';
        
         /*testing*/
