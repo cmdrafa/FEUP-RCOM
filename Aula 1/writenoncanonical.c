@@ -11,8 +11,8 @@
     #include <string.h>
     #include <unistd.h>
      
-    #define BAUDRATE B38400
-    #define MODEMDEVICE "/dev/ttyS1"
+    #define BAUDRATE B9600
+    #define MODEMDEVICE "/dev/ttyS0"
     #define _POSIX_SOURCE 1 /* POSIX compliant source */
     #define FALSE 0
     #define TRUE 1
@@ -28,7 +28,7 @@
        
         if ( (argc < 2) ||
                  ((strcmp("/dev/ttyS0", argv[1])!=0) &&
-                  (strcmp("/dev/ttyS1", argv[1])!=0) &&
+                  (strcmp("/dev/ttyS4", argv[1])!=0) &&
                       (strcmp("/dev/ttyS4", argv[1])!=0))) {
           printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
           exit(1);
@@ -85,7 +85,6 @@
        
         /*testing*/
         buf[25] = '\n';
-       
         res = write(fd,buf,255);  
         printf("%d bytes written\n", res);
      
