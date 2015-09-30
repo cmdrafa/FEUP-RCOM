@@ -10,6 +10,7 @@
     #include <stdlib.h>
     #include <string.h>
     #include <unistd.h>
+
      
     #define BAUDRATE B9600
     #define MODEMDEVICE "/dev/ttyS0"
@@ -87,7 +88,8 @@
         buf[25] = '\n';
         res = write(fd,buf,255);  
         printf("%d bytes written\n", res);
-     
+     	
+	sleep(3);
      
       /*
         O ciclo FOR e as instruções seguintes devem ser alterados de modo a respeitar
