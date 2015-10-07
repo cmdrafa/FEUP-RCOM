@@ -17,7 +17,7 @@
 
 	#define FLAG 0x7e
 	#define A 0x03
-	#define C 0x03
+	#define C 0x07
 	#define SETLEN 5
 	#define TIMEOUT 3
 	#define ATTEMPTS 3
@@ -117,7 +117,8 @@
 
 	void resetConfiguration(int * fd, struct termios * oldtio) {
 		printf("Restoring default config");
-
+		
+		sleep(1);
 		if ( tcsetattr(*fd,TCSANOW,oldtio) == -1)
 		{
 			perror("tcsetattr");
