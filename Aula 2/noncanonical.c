@@ -37,9 +37,9 @@
 		exit(1);
 	}
 
-	/*
-	Open serial port for r/w and not for controlling tty to avoid getting killed
-	*/
+	
+	//Open serial port for r/w and not for controlling tty to avoid getting killed
+	
 
 	fd = open(argv[1], O_RDWR | O_NOCTTY );
 
@@ -47,23 +47,23 @@
 		perror(argv[1]); exit(-1);
 	}
 
-	tcgetattr(fd,&oldtio); /* save port settings */
+	tcgetattr(fd,&oldtio); // save port settings 
 	bzero(&newtio, sizeof(newtio));
 	newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
 	newtio.c_iflag = IGNPAR;
 	newtio.c_oflag = 0;
 	
-	/* set input mode*/
+	// set mode for input
 	newtio.c_lflag = 0;
-	newtio.c_cc[VTIME] = 0.1; /* inter-character timer unused */
-	newtio.c_cc[VMIN] = 1; /* blocking read until we receive 1 char*/
+	newtio.c_cc[VTIME] = 0.1; 
+	newtio.c_cc[VMIN] = 1; 
 	tcflush(fd, TCIFLUSH);
 	tcsetattr(fd,TCSANOW,&newtio);
 	printf("New termios structure set\n");
 	int i = 0;
 
-	while (STOP==FALSE) { /* input */
-		res = read(fd,buf,1); /* returns after 1 char input */
+	while (STOP==FALSE) { // input 
+		res = read(fd,buf,1); // returns after 1 char input 
 
 		f[i] = buf[0];
 

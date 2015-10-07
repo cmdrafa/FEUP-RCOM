@@ -1,21 +1,20 @@
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <signal.h>
+	#include <sys/types.h>
+	#include <sys/stat.h>
+	#include <fcntl.h>
+	#include <termios.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	#include <unistd.h>
+	#include <signal.h>
 
      
 	#define BAUDRATE B9600
 	#define MODEMDEVICE "/dev/ttyS0"
-	#define _POSIX_SOURCE 1 /* POSIX compliant source */
+	#define _POSIX_SOURCE 1 // POSIX compliant source 
 	#define FALSE 0
 	#define TRUE 1
 
-	// lab2 constants
 	#define FLAG 0x7e
 	#define A 0x03
 	#define C 0x03
@@ -41,23 +40,23 @@
 	}
 
 	int readResponse(int * fd) {
-		// **********************
+		
 		// READ RESPONSE
-		// **********************
+		
 		int res;
 		char buf[SETLEN];
-		char temp[SETLEN];
+		char f[SETLEN];
 		tcflush(*fd, TCIFLUSH);
 		int i = 0;
 	
 		printf("Reading!");
-		while (STOP==FALSE && !flag) /* loop for input */
+		while (STOP==FALSE && !flag) // input 
 		{
-			res = read(*fd,buf,1); /* returns after 1 chars have been input */
+			res = read(*fd,buf,1); // returns after 1 chars have been input 
 		
 			if(res != 0) {
-				temp[i] = buf[0];
-				if(temp[i] == FLAG && i!=0) {
+				f[i] = buf[0];
+				if(f[i] == FLAG && i!=0) {
 					STOP = TRUE;
 				}
 				else {
@@ -68,13 +67,13 @@
 	
 		if(flag) return -1;
 	
-		if(temp[3] != (temp[1]^temp[2]))
+		if(f[3] != (f[1]^f[2]))
 		{
 			printf("Error on BCC");
 			return -1;
 		}
 		printf("...\n");
-		printf("%x, %x, %x, %x, %x\n", temp[0], temp[1], temp[2],temp[3],temp[4]);
+		printf("%x, %x, %x, %x, %x\n", f[0], f[1], f[2],f[3],f[4]);
 
 		return 0;
 	}
@@ -89,7 +88,7 @@
 
 		printf("...\n");
 
-		if ( tcgetattr(*fd,oldtio) == -1) { /* save current port settings */
+		if ( tcgetattr(*fd,oldtio) == -1) { // save current port settings 
 			perror("tcgetattr");
 			exit(-1);
 		}
@@ -100,10 +99,10 @@
 		newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
 		newtio.c_iflag = IGNPAR;
 		newtio.c_oflag = OPOST;
-		/* set input mode (non-canonical, no echo,...) */
+		// set input mode (non-canonical, no echo,...) 
 		newtio.c_lflag = 0;
 		newtio.c_cc[VTIME] = 0.1;
-		newtio.c_cc[VMIN] = 1; /* blocking read until 1 chars received */
+		newtio.c_cc[VMIN] = 1; // blocking read until 1 chars received 
 
 		printf("Saving new config! ");
 
