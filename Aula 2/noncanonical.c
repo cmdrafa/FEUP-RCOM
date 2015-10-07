@@ -87,7 +87,7 @@
 
 	printf("%x, %x, %x, %x, %x\n", f[0], f[1], f[2],f[3],f[4]);
 	tcflush(fd, TCOFLUSH);
-	sleep(1);
+	
 	res = write(fd, UA, UALENGTH);
 	sleep(1);
 	tcsetattr(fd,TCSANOW,&oldtio);
