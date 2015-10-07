@@ -1,123 +1,175 @@
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <signal.h>
+
+     
+	#define BAUDRATE B9600
+	#define MODEMDEVICE "/dev/ttyS0"
+	#define _POSIX_SOURCE 1 /* POSIX compliant source */
+	#define FALSE 0
+	#define TRUE 1
+
+	// lab2 constants
+	#define FLAG 0x7e
+	#define A 0x03
+	#define C 0x03
+	#define SETLEN 5
+	#define TIMEOUT 3
+	#define ATTEMPTS 3
+
+	volatile int STOP = FALSE;
+	int flag = 1,count = 0;
+
+
+	void writeMsg(int * fd) {
+		printf("Sending!");
+		tcflush(*fd, TCOFLUSH); // Clean output buffer
+		unsigned char SET[SETLEN];
+		SET[0] = FLAG;
+		SET[1] = A;
+		SET[2] = C;
+		SET[3] = SET[1] ^ SET[2]; //BCC
+		SET[4] = FLAG;
+		write(*fd, SET, SETLEN);
+		printf("...\n");
+	}
+
+	int readResponse(int * fd) {
+		// **********************
+		// READ RESPONSE
+		// **********************
+		int res;
+		char buf[SETLEN];
+		char temp[SETLEN];
+		tcflush(*fd, TCIFLUSH);
+		int i = 0;
 	
+		printf("Reading!");
+		while (STOP==FALSE && !flag) /* loop for input */
+		{
+			res = read(*fd,buf,1); /* returns after 1 chars have been input */
+		
+			if(res != 0) {
+				temp[i] = buf[0];
+				if(temp[i] == FLAG && i!=0) {
+					STOP = TRUE;
+				}
+				else {
+					i++;
+				}
+			}
+		}
+	
+		if(flag) return -1;
+	
+		if(temp[3] != (temp[1]^temp[2]))
+		{
+			printf("Error on BCC");
+			return -1;
+		}
+		printf("...\n");
+		printf("%x, %x, %x, %x, %x\n", temp[0], temp[1], temp[2],temp[3],temp[4]);
 
-    /*Non-Canonical Input Processing*/
-     
-    #include <sys/types.h>
-    #include <sys/stat.h>
-    #include <fcntl.h>
-    #include <termios.h>
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include <unistd.h>
+		return 0;
+	}
 
-     
-    #define BAUDRATE B9600
-    #define MODEMDEVICE "/dev/ttyS0"
-    #define _POSIX_SOURCE 1 /* POSIX compliant source */
-    #define FALSE 0
-    #define TRUE 1
+	void configure(int * fd, char * serial_port, struct termios * oldtio) {
+	
+		struct termios newtio;
+		printf("Configuration started!");
+		*fd = open(serial_port, O_RDWR | O_NOCTTY );
 
-    #define FLAG 0x7e
-    #define A 0x03
-    #define C_SET 0x07
-    #define BCC1 A^C
-     
-    volatile int STOP=FALSE;
-     
-    int main(int argc, char** argv)
-    {
-        int fd,c, res;
-        struct termios oldtio,newtio;
-        char buf[255];
-        int i, sum = 0, speed = 0;
-	unsigned char set[5];
-       
-        if ( (argc < 2) ||
-                 ((strcmp("/dev/ttyS0", argv[1])!=0) &&
-                  (strcmp("/dev/ttyS4", argv[1])!=0) &&
-                      (strcmp("/dev/ttyS4", argv[1])!=0))) {
-          printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
-          exit(1);
-        }
-     
-     
-      /*
-        Open serial port device for reading and writing and not as controlling tty
-        because we don't want to get killed if linenoise sends CTRL-C.
-      */
-     
-     
-        fd = open(argv[1], O_RDWR | O_NOCTTY );
-        if (fd <0) {perror(argv[1]); exit(-1); }
-     
-        if ( tcgetattr(fd,&oldtio) == -1) { /* save current port settings */
-          perror("tcgetattr");
-          exit(-1);
-        }
-     
-        bzero(&newtio, sizeof(newtio));
-        newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
-        newtio.c_iflag = IGNPAR;
-        newtio.c_oflag = 0;
-     
-        /* set input mode (non-canonical, no echo,...) */
-        newtio.c_lflag = 0;
-     
-        newtio.c_cc[VTIME]    = 0;   /* inter-character timer unused */
-        newtio.c_cc[VMIN]     = 5;   /* blocking read until 5 chars received */
-     
-     
-     
-      /*
-        VTIME e VMIN devem ser alterados de forma a proteger com um temporizador a
-        leitura do(s) próximo(s) caracter(es)
-      */
-     
-     
-     
-        tcflush(fd, TCIOFLUSH);
-     
-        if ( tcsetattr(fd,TCSANOW,&newtio) == -1) {
-          perror("tcsetattr");
-          exit(-1);
-        }
-     
-        printf("New termios structure set\n");
-     
-     
-        printf("Message to be sent: ");
-        fgets(buf, sizeof(char) * 255, stdin);
-        buf[(unsigned)strlen(buf)] = '\0';
-       
-	/*
-	 * supTrama is the first trama to send
-	 */
-	set[0] = FLAG;
-	set[1] = A;
-	set[2] = C;
-	set[3] = BCC1;
-	set[4] = FLAG;
-        //////////////////////////////////////////////////////////////////////////////////////////////
+		if (*fd <0) {perror(serial_port); exit(-1); }
 
-        /*testing*/
-        buf[25] = '\n';
-        res = write(fd,buf,255);  
-        printf("%d bytes written\n", res);
-     	    
-     
-        sleep(3);
-       
-        if ( tcsetattr(fd,TCSANOW,&oldtio) == -1) {
-          perror("tcsetattr");
-          exit(-1);
-        }
-     
-     
-     
-     
-        close(fd);
-        return 0;
-    }
+		printf("...\n");
+
+		if ( tcgetattr(*fd,oldtio) == -1) { /* save current port settings */
+			perror("tcgetattr");
+			exit(-1);
+		}
+
+		printf("Old config saved...\n");
+
+		bzero(&newtio, sizeof(newtio));
+		newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+		newtio.c_iflag = IGNPAR;
+		newtio.c_oflag = OPOST;
+		/* set input mode (non-canonical, no echo,...) */
+		newtio.c_lflag = 0;
+		newtio.c_cc[VTIME] = 0.1;
+		newtio.c_cc[VMIN] = 1; /* blocking read until 1 chars received */
+
+		printf("Saving new config! ");
+
+		if ( tcsetattr(*fd,TCSANOW,&newtio) == -1)
+		{
+			perror("tcsetattr");
+			exit(-1);
+		}
+
+		printf("...\n");
+	}
+
+	void resetConfiguration(int * fd, struct termios * oldtio) {
+		printf("Restoring default config");
+
+		if ( tcsetattr(*fd,TCSANOW,oldtio) == -1)
+		{
+			perror("tcsetattr");
+			exit(-1);
+		}
+
+		printf("...\n");
+		close(*fd);
+	}
+	
+	void triggerAlarm() {
+	
+		flag = 1;
+		count++;
+		printf("Timeout Expired: %ds\n", TIMEOUT);
+	}
+
+	int main(int argc, char** argv)
+	{
+		int fd;
+		struct termios oldtio;
+
+		if ( (argc < 2) ||
+		((strcmp("/dev/ttyS0", argv[1])!=0) &&
+		(strcmp("/dev/ttyS1", argv[1])!=0) &&
+		(strcmp("/dev/ttyS4", argv[1])!=0)))
+		{
+			printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
+			exit(1);
+		}
+
+		configure(&fd, argv[1], &oldtio);
+		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
+		// Resend
+
+		while(count < ATTEMPTS) {
+
+			if(flag) {
+				alarm(TIMEOUT);
+				printf("\nAttempts remaining: %d \n", (ATTEMPTS - count - 1));
+				writeMsg(&fd);
+				flag = 0;
+				if(readResponse(&fd) == 0) {
+					printf("-> Response received!\n");
+					break;
+				}
+			}
+		}
+
+		resetConfiguration(&fd, &oldtio);
+		return 0;
+	}
 
 
