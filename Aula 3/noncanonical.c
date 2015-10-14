@@ -25,7 +25,7 @@
 
 	int main(int argc, char** argv)
 	{
-		int c, res, fd;						//Viariable initiation
+		int c, res, fd;						//Variable initiation
 		struct termios oldtio,newtio;		//Variables with the new and old Port configurations
 		char buf[1];						//Buffer to receive info
 		char f[UALENGTH];					//Variable to store received flags
