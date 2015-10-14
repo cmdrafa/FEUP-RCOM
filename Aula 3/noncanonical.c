@@ -63,16 +63,61 @@
 		//********************************************************************************
 		
 		//**** While that controls the reception of the info as well as the possible errors ****
-		int i = 0;
-		while (STOP==FALSE) { // input 
-			res = read(fd,buf,1); // returns after 1 char input 
-
-			f[i] = buf[0];
-
-			if(f[i] == FLAG && i!=0)
-				STOP = TRUE;
-			else
-				i++;
+		
+		unsigned int stateMachine = 0;
+		while (stateMachine < 5) { // state machine control 
+			char readChar;						
+			res = read(fd,readChar,1); // returns after 1 char input 
+			switch (stateMachine) {
+				case 0:
+					if (readChar == FLAG)
+						stateMachine = 1;
+					break;
+				case 1:
+					switch(readChar) {
+						case FLAG:
+							break;
+						case A:
+							stateMachine = 2;
+							break;
+						default:
+							stateMachine = 0;
+							break;
+					}
+				case 2:
+					switch(readChar) {
+						case FLAG:
+							stateMachine = 1;
+							break;
+						case C:
+							stateMachine = 3;							
+							break;
+						default:
+							stateMachine = 0;
+							break;
+					}
+				case 3:
+					switch(readChar) {
+						case FLAG:
+							stateMachine = 1;
+							break;
+						case BCC:
+							stateMachine = 4;
+							break;
+						default:
+							stateMachine = 0;
+							break;
+					}
+				case 4:
+					switch(readChar) {
+						case FLAG:
+							stateMachine = 5;
+							break;
+						default:
+							stateMachine = 0;
+							break;
+					}
+			}			
 		}
 		//**************************************************************************************
 		
