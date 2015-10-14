@@ -27,8 +27,6 @@
 	{
 		int c, res, fd;						//Variable initiation
 		struct termios oldtio,newtio;		//Variables with the new and old Port configurations
-		char buf[1];						//Buffer to receive info
-		char f[UALENGTH];					//Variable to store received flags
 		unsigned char UA[UALENGTH];			//Variable to send Flags
 
 		//************* If clause to check if received arguments are correct ********************
@@ -63,24 +61,25 @@
 		//********************************************************************************
 		
 		//**** While that controls the reception of the info as well as the possible errors ****
-		
+		char response[5]; 		
+
 		unsigned int stateMachine = 0;
 		while (stateMachine < 5) { // state machine control 
 			char readChar;						
 			res = read(fd,&readChar,1); // returns after 1 char input 
-			printf("restate: %d \n", res);			
 			switch (stateMachine) {
 				case 0:
-					printf("StateMachine at 0\n");
-					if (readChar == FLAG)
+					if (readChar == FLAG) {
+						response[stateMachine] = readChar;
 						stateMachine = 1;
+					}					
 					break;
 				case 1:
-					printf("StateMachine at 1\n");
 					switch(readChar) {
 						case FLAG:
 							break;
 						case A:
+							response[stateMachine] = readChar;
 							stateMachine = 2;
 							break;
 						default:
@@ -89,12 +88,12 @@
 					}
 					break;
 				case 2:
-					printf("StateMachine at 2\n");
 					switch(readChar) {
 						case FLAG:
 							stateMachine = 1;
 							break;
 						case C:
+							response[stateMachine] = readChar;
 							stateMachine = 3;			
 							break;
 						default:
@@ -103,12 +102,12 @@
 					}
 					break;
 				case 3:
-					printf("StateMachine at 3\n");
 					switch(readChar) {
 						case FLAG:
 							stateMachine = 1;
 							break;
 						case BCC:
+							response[stateMachine] = readChar;
 							stateMachine = 4;
 							break;
 						default:
@@ -117,10 +116,11 @@
 					}
 					break;
 				case 4:
-					printf("StateMachine at 4\n");
 					switch(readChar) {
 						case FLAG:
-							printf("StateMachine at 5\n");
+							response[stateMachine] = readChar;
+							printf("Read correct Flags\n");
+							printf("0x%x, 0x%x, 0x%x, 0x%x, 0x%x.\n", response[0], response[1], response[2], response[3], response[4]);
 							stateMachine = 5;
 							break;
 						default:
@@ -142,13 +142,6 @@
 		UA[4] = FLAG;
 		//**************************************		
 
-		if(f[3] != (f[1]^f[2]))
-		{
-		 	printf("Error on BCC!");
-			exit(1);
-		}
-
-		printf("%x, %x, %x, %x, %x\n", f[0], f[1], f[2],f[3],f[4]);
 		tcflush(fd, TCOFLUSH);
 		
 		//*** Respond to the sender *******	
