@@ -49,12 +49,9 @@
 	int readResponse(int * fd) {
 		
 		int res;
-		char buf[SETLEN];
-		char f[SETLEN];
 		int i = 0;
-	
-		printf("Reading!\n");
-		
+		char response[5];		
+
 		//************* While that controls the reading of the response of the receiver *********
 		unsigned int stateMachine = 0;
 		while (stateMachine < 5) { // state machine control 
@@ -62,18 +59,19 @@
 			res = read(*fd,&readChar,1); // returns after 1 char input 
 				
 			if (!flag && (res == 1)) {
-				printf("LEU LEU LEU LEU LEU\n");			
 				switch (stateMachine) {
 					case 0:
-						if (readChar == FLAG)
+						if (readChar == FLAG) {
+							response[stateMachine] = readChar;
 							stateMachine = 1;
+						}
 						break;
 					case 1:
-						printf("StateMachine at 1\n");
 						switch(readChar) {
 							case FLAG:
 								break;
 							case A:
+								response[stateMachine] = readChar;
 								stateMachine = 2;
 								break;
 							default:
@@ -82,12 +80,12 @@
 						}
 						break;
 					case 2:
-						printf("StateMachine at 2\n");
 						switch(readChar) {
 							case FLAG:
 								stateMachine = 1;
 								break;
 							case C:
+								response[stateMachine] = readChar;
 								stateMachine = 3;			
 								break;
 							default:
@@ -96,12 +94,12 @@
 						}
 						break;
 					case 3:
-						printf("StateMachine at 3\n");
 						switch(readChar) {
 							case FLAG:
 								stateMachine = 1;
 								break;
 							case BCC:
+								response[stateMachine] = readChar;
 								stateMachine = 4;
 								break;
 							default:
@@ -110,10 +108,11 @@
 						}
 						break;
 					case 4:
-						printf("StateMachine at 4\n");
 						switch(readChar) {
 							case FLAG:
-								printf("StateMachine at 5\n");
+								response[stateMachine] = readChar;
+								printf("Correct response read: ");
+								printf("0x%x, 0x%x, 0x%x, 0x%x, 0x%x.\n", response[0], response[1], response[2], response[3], response[4]);	
 								stateMachine = 5;
 								break;
 							default:
@@ -131,9 +130,6 @@
 	
 		if(flag)
 			return -1;
-
-		printf("...\n");
-		printf("%x, %x, %x, %x, %x\n", f[0], f[1], f[2],f[3],f[4]);
 
 		return 0;
 	}
@@ -153,8 +149,6 @@
 			perror(serial_port);
 			exit(-1);
 		}
-
-		printf("...\n");
 
 		if ( tcgetattr(*fd,oldtio) == -1) { // save current port settings 
 			perror("tcgetattr");
@@ -198,7 +192,6 @@
 			exit(-1);
 		}
 
-		printf("...\n");
 		close(*fd);
 	}
 	//*******************************************************************
