@@ -32,7 +32,7 @@
 		unsigned char UA[UALENGTH];			//Variable to send Flags
 
 		//************* If clause to check if received arguments are correct ********************
-		if ( (argc < 2) || ((strcmp("/dev/ttyS0", argv[1])!=0) && strcmp("/dev/ttyS4", argv[1])!=0) )) {
+		if ( (argc < 2) || ((strcmp("/dev/ttyS0", argv[1])!=0) && (strcmp("/dev/ttyS4", argv[1])!=0) )) {
 			printf("Usage:\tWrong serial Port\n\tex: Serial /dev/ttyS1\n");
 			exit(1);
 		}
@@ -67,13 +67,16 @@
 		unsigned int stateMachine = 0;
 		while (stateMachine < 5) { // state machine control 
 			char readChar;						
-			res = read(fd,readChar,1); // returns after 1 char input 
+			res = read(fd,&readChar,1); // returns after 1 char input 
+			printf("restate: %d \n", res);			
 			switch (stateMachine) {
 				case 0:
+					printf("StateMachine at 0\n");
 					if (readChar == FLAG)
 						stateMachine = 1;
 					break;
 				case 1:
+					printf("StateMachine at 1\n");
 					switch(readChar) {
 						case FLAG:
 							break;
@@ -84,19 +87,23 @@
 							stateMachine = 0;
 							break;
 					}
+					break;
 				case 2:
+					printf("StateMachine at 2\n");
 					switch(readChar) {
 						case FLAG:
 							stateMachine = 1;
 							break;
 						case C:
-							stateMachine = 3;							
+							stateMachine = 3;			
 							break;
 						default:
 							stateMachine = 0;
 							break;
 					}
+					break;
 				case 3:
+					printf("StateMachine at 3\n");
 					switch(readChar) {
 						case FLAG:
 							stateMachine = 1;
@@ -108,15 +115,19 @@
 							stateMachine = 0;
 							break;
 					}
+					break;
 				case 4:
+					printf("StateMachine at 4\n");
 					switch(readChar) {
 						case FLAG:
+							printf("StateMachine at 5\n");
 							stateMachine = 5;
 							break;
 						default:
 							stateMachine = 0;
 							break;
 					}
+					break;
 			}			
 		}
 		//**************************************************************************************
