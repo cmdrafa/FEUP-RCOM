@@ -18,6 +18,7 @@
 	#define FLAG 0x7e
 	#define A 0x03
 	#define C 0x07
+	#define BCC A^C
 	#define SETLEN 5
 	#define TIMEOUT 3
 	#define ATTEMPTS 3
@@ -50,38 +51,86 @@
 		int res;
 		char buf[SETLEN];
 		char f[SETLEN];
-		tcflush(*fd, TCIFLUSH);
 		int i = 0;
 	
-		printf("Reading!");
+		printf("Reading!\n");
 		
 		//************* While that controls the reading of the response of the receiver *********
-		while (STOP==FALSE && !flag) // input 
-		{
-			res = read(*fd,buf,1); // returns after 1 chars have been input 
-		
-			if(res != 0) {
-				f[i] = buf[0];
-				if(f[i] == FLAG && i!=0) {
-					STOP = TRUE;
-				}
-				else {
-					i++;
+		unsigned int stateMachine = 0;
+		while (stateMachine < 5) { // state machine control 
+			char readChar;						
+			res = read(*fd,&readChar,1); // returns after 1 char input 
+				
+			if (!flag && (res == 1)) {
+				printf("LEU LEU LEU LEU LEU\n");			
+				switch (stateMachine) {
+					case 0:
+						if (readChar == FLAG)
+							stateMachine = 1;
+						break;
+					case 1:
+						printf("StateMachine at 1\n");
+						switch(readChar) {
+							case FLAG:
+								break;
+							case A:
+								stateMachine = 2;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+					case 2:
+						printf("StateMachine at 2\n");
+						switch(readChar) {
+							case FLAG:
+								stateMachine = 1;
+								break;
+							case C:
+								stateMachine = 3;			
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+					case 3:
+						printf("StateMachine at 3\n");
+						switch(readChar) {
+							case FLAG:
+								stateMachine = 1;
+								break;
+							case BCC:
+								stateMachine = 4;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+					case 4:
+						printf("StateMachine at 4\n");
+						switch(readChar) {
+							case FLAG:
+								printf("StateMachine at 5\n");
+								stateMachine = 5;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
 				}
 			}
-		}
+			else if (flag)
+				break;			
+		}		
+
 		//***************************************************************************************
 	
 		if(flag)
 			return -1;
-		
-		//*** Check if received flags are correct *****
-		if(f[3] != (f[1]^f[2]))
-		{
-			printf("Error on BCC");
-			return -1;
-		}
-		//*********************************************
 
 		printf("...\n");
 		printf("%x, %x, %x, %x, %x\n", f[0], f[1], f[2],f[3],f[4]);
@@ -97,7 +146,7 @@
 		printf("Configuration started!");
 
 		//Open the serial port
-		*fd = open(serial_port, O_RDWR | O_NOCTTY );
+		*fd = open(serial_port, O_RDWR | O_NOCTTY | O_NONBLOCK );
 		
 		//Check for errors of opening the port
 		if (*fd <0) {
@@ -181,13 +230,19 @@
 		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
 		//*********** While cycle to control the sending of the message **************
+		tcflush(fd, TCIFLUSH);
+
+		
+
 		while(count < ATTEMPTS) {
 
 			if(flag) {
 				alarm(TIMEOUT);
 				printf("\nAttempts remaining: %d \n", (ATTEMPTS - count - 1));
 				writeMsg(&fd);
+				tcflush(fd, TCIFLUSH);
 				flag = FALSE;
+				printf("waiting...\n");
 				if(readResponse(&fd) == 0) {
 					printf("-> Response received!\n");
 					break;
