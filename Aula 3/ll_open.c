@@ -1,30 +1,7 @@
-	#include <sys/types.h>
-	#include <sys/stat.h>
-	#include <fcntl.h>
-	#include <termios.h>
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <string.h>
-	#include <unistd.h>
-	#include <signal.h>
-
-     
-	#define BAUDRATE B9600
-	#define MODEMDEVICE "/dev/ttyS0"
-	#define _POSIX_SOURCE 1 // POSIX compliant source 
-	#define FALSE 0
-	#define TRUE 1
-
-	#define FLAG 0x7e
-	#define A 0x03
-	#define C 0x07
-	#define BCC A^C
-	#define SETLEN 5
-	#define TIMEOUT 3
-	#define ATTEMPTS 3
-
-	volatile int STOP = FALSE;
-	int flag = TRUE,count = 0;
+	#include "ll_open.h"
+	
+	int * flagPointer;
+	int * countPointer;	
 
 	//*********************** Function to send the message **************************
 	void writeMsg(int * fd) {
@@ -35,7 +12,7 @@
 		unsigned char SET[SETLEN];
 		SET[0] = FLAG;
 		SET[1] = A;
-		SET[2] = C;
+		SET[2] = C_SET;
 		SET[3] = SET[1] ^ SET[2]; //BCC
 		SET[4] = FLAG;
 		//********************************************
@@ -46,7 +23,7 @@
 	//*******************************************************************************
 
 	//************** Read the response of the receiver ******************************
-	int readResponse(int * fd) {
+	int readResponse(int * fd, int * flag) {
 		
 		int res;
 		int i = 0;
@@ -57,8 +34,8 @@
 		while (stateMachine < 5) { // state machine control 
 			char readChar;						
 			res = read(*fd,&readChar,1); // returns after 1 char input 
-				
-			if (!flag && (res == 1)) {
+
+			if (!*flag && (res == 1)) {
 				switch (stateMachine) {
 					case 0:
 						if (readChar == FLAG) {
@@ -84,7 +61,7 @@
 							case FLAG:
 								stateMachine = 1;
 								break;
-							case C:
+							case C_SET:
 								response[stateMachine] = readChar;
 								stateMachine = 3;			
 								break;
@@ -122,13 +99,13 @@
 						break;
 				}
 			}
-			else if (flag)
+			else if (*flag)
 				break;			
 		}		
 
 		//***************************************************************************************
 	
-		if(flag)
+		if(*flag)
 			return -1;
 
 		return 0;
@@ -198,55 +175,136 @@
 	
 	//********** Function to trigger alarm ***********
 	void triggerAlarm() {
-	
-		flag = TRUE;
-		count++;
+		*flagPointer = TRUE;
+		*countPointer = *countPointer + 1;
 		printf("Timeout Expired: %ds\n", TIMEOUT);
 	}
 	//************************************************
 
-	int main(int argc, char** argv)
-	{
-		int fd;
-		struct termios oldtio;
+	int ll_open(int * flag, int * stop, int * count, int fd, char side, char * port, struct termios * oldtio) {
 		
-		//********************* Check if the arguments are corrected *****************************
-		if ( (argc < 2) || ((strcmp("/dev/ttyS0", argv[1])!=0) && (strcmp("/dev/ttyS1", argv[1])!=0) &&	(strcmp("/dev/ttyS4", argv[1])!=0)))
-		{
-			printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
-			exit(1);
-		}
-		//****************************************************************************************
-
-		configure(&fd, argv[1], &oldtio);
-
-		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
+		configure(&fd, port, oldtio);
 
 		//*********** While cycle to control the sending of the message **************
-		tcflush(fd, TCIFLUSH);
+		if (side == 'W') {
+			printf("\nThis is the sender...\n");
 
-		
+			flagPointer = flag;
+			countPointer = count;
 
-		while(count < ATTEMPTS) {
+			tcflush(fd, TCIFLUSH);
+			while(*count < ATTEMPTS) {
+	
+				if(&flag) {
+					alarm(TIMEOUT);
 
-			if(flag) {
-				alarm(TIMEOUT);
-				printf("\nAttempts remaining: %d \n", (ATTEMPTS - count - 1));
-				writeMsg(&fd);
-				tcflush(fd, TCIFLUSH);
-				flag = FALSE;
-				printf("waiting...\n");
-				if(readResponse(&fd) == 0) {
-					printf("-> Response received!\n");
-					break;
+					printf("\nAttempts remaining: %d \n", (ATTEMPTS - *count - 1));
+					writeMsg(&fd);
+					tcflush(fd, TCIFLUSH);
+					*flag = FALSE;
+					printf("waiting...\n");
+					if(readResponse(&fd, flag) == 0) {
+						printf("-> Response received!\n");
+						break;
+					}
 				}
 			}
+			//****************************************************************************
 		}
-		//****************************************************************************
+		else if (side == 'R') {
+			printf("\nThis is the receiver\n");
 
+			//**** While that controls the reception of the info as well as the possible errors ****
+			char response[5]; 
+			int res;		
 
-		resetConfiguration(&fd, &oldtio);
-		return 0;
+			unsigned int stateMachine = 0;
+			while (stateMachine < 5) { // state machine control 
+				char readChar;						
+				res = read(fd,&readChar,1); // returns after 1 char input 
+				switch (stateMachine) {
+					case 0:
+						if (readChar == FLAG) {
+							response[stateMachine] = readChar;
+							stateMachine = 1;
+						}					
+						break;
+					case 1:
+						switch(readChar) {
+							case FLAG:
+								break;
+							case A:
+								response[stateMachine] = readChar;
+								stateMachine = 2;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+					case 2:
+						switch(readChar) {
+							case FLAG:
+								stateMachine = 1;
+								break;
+							case C_SET:
+								response[stateMachine] = readChar;
+								stateMachine = 3;			
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+					case 3:
+						switch(readChar) {
+							case FLAG:
+								stateMachine = 1;
+								break;
+							case BCC:
+								response[stateMachine] = readChar;
+								stateMachine = 4;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+					case 4:
+						switch(readChar) {
+							case FLAG:
+								response[stateMachine] = readChar;
+								printf("Read correct Flags\n");
+								printf("0x%x, 0x%x, 0x%x, 0x%x, 0x%x.\n", response[0], response[1], response[2], response[3], response[4]);
+								stateMachine = 5;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+				}			
+			}
+			//**************************************************************************************
+		
+			//**************************************
+			//****** Prepare UA response************
+			//**************************************
+			unsigned char UA[UALENGTH];			//Variable to send Flags
+			UA[0] = FLAG;
+			UA[1] = A;
+			UA[2] = C_SET;
+			UA[3] = BCC;
+			UA[4] = FLAG;
+			//**************************************		
+	
+			tcflush(fd, TCOFLUSH);
+		
+			//*** Respond to the sender *******	
+			res = write(fd, UA, UALENGTH);
+		}
+
+		resetConfiguration(&fd, oldtio);	
 	}
 
 
