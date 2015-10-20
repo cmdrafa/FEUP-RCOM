@@ -61,7 +61,7 @@
 							case FLAG:
 								stateMachine = 1;
 								break;
-							case C_SET:
+							case C_UA:
 								response[stateMachine] = readChar;
 								stateMachine = 3;			
 								break;
@@ -75,7 +75,7 @@
 							case FLAG:
 								stateMachine = 1;
 								break;
-							case BCC:
+							case A^C_UA:
 								response[stateMachine] = readChar;
 								stateMachine = 4;
 								break;
@@ -293,8 +293,8 @@
 			unsigned char UA[UALENGTH];			//Variable to send Flags
 			UA[0] = FLAG;
 			UA[1] = A;
-			UA[2] = C_SET;
-			UA[3] = BCC;
+			UA[2] = C_UA;
+			UA[3] = A^C_UA;
 			UA[4] = FLAG;
 			//**************************************		
 	
