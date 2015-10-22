@@ -15,9 +15,6 @@
 
 		int fd;
 		struct termios oldtio;
-
-		printf("\n%s\n", argv[1]);
-
 		//********************* Check if the arguments are corrected *****************************
 		if ( (argc < 3) || ((strcmp("/dev/ttyS0", argv[1])!=0) && (strcmp("/dev/ttyS1", argv[1])!=0) &&	(strcmp("/dev/ttyS4", argv[1])!=0)))
 		{
@@ -32,7 +29,8 @@
 
 		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
-		ll_open(flag, stop, count, fd, *argv[2], port, &oldtio);
+		ll_open(flag, stop, count, &fd, *argv[2], port, &oldtio);
+		ll_close(flag, stop, count, &fd, *argv[2], port, &oldtio);
 
 		free(count);
 		free(flag);

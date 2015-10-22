@@ -15,7 +15,8 @@
 	#define TRUE 1
 
 	#define FLAG 0x7e
-	#define A 0x03
+	#define A_1 0x03
+	#define A_2 0x01
 
 	#define C_SET 0x07
 	#define C_UA 0x03
@@ -38,4 +39,6 @@
 
 	void triggerAlarm();
 
-	int ll_open(int * flag, int * stop, int * count, int fd, char side, char * port, struct termios * oldtio);
+	int ll_open(int * flag, int * stop, int * count, int * fd, char side, char * port, struct termios * oldtio);
+
+	int ll_close(int * flag, int * stop, int * count, int * fd, char side, char * port, struct termios * oldtio);

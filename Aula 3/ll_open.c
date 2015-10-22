@@ -5,7 +5,7 @@
 
 	//*********************** Function to send the message **************************
 	void writeMsg(int * fd, char aFlag, char cFlag) {
-		printf("Sending!");
+		printf("\nSending!");
 		tcflush(*fd, TCOFLUSH); // Clean output buffer
 
 		//******* Setting the flags to send **********
@@ -18,7 +18,7 @@
 		//********************************************
 
 		write(*fd, SET, SETLEN); //Sending the info
-		printf("Information sent...\n");
+		printf("\nInformation sent...");
 	}
 	//*******************************************************************************
 
@@ -34,9 +34,6 @@
 		while (stateMachine < 5) { // state machine control
 			char readChar;
 			res = read(*fd,&readChar,1); // returns after 1 char input
-
-			if (stateMachine > 0)
-			printf("\n%d", stateMachine);
 
 			if (!*flag && (res == 1)) {
 				switch (stateMachine) {
@@ -85,8 +82,8 @@
 						switch(readChar) {
 							case FLAG:
 								response[stateMachine] = readChar;
-								printf("Correct response read: ");
-								printf("0x%x, 0x%x, 0x%x, 0x%x, 0x%x.\n", response[0], response[1], response[2], response[3], response[4]);
+								printf("\nCorrect response read: ");
+								printf("\n                              0x%x, 0x%x, 0x%x, 0x%x, 0x%x.", response[0], response[1], response[2], response[3], response[4]);
 								stateMachine = 5;
 								break;
 							default:
@@ -113,7 +110,7 @@
 
 		//Initialized variable to set the new config to the port
 		struct termios newtio;
-		printf("Configuration started!");
+		printf("\nConfiguration started!");
 
 		//Open the serial port
 		*fd = open(serial_port, O_RDWR | O_NOCTTY | O_NONBLOCK );
@@ -129,7 +126,7 @@
 			exit(-1);
 		}
 
-		printf("Old config saved...\n");
+		printf("\nOld config saved...");
 
 		//***** Set the new configuration of the port *******************
 		bzero(&newtio, sizeof(newtio));
@@ -141,7 +138,7 @@
 		newtio.c_cc[VTIME] = 0.1;
 		newtio.c_cc[VMIN] = 1; // blocking read until 1 chars received
 
-		printf("Saving new config! ");
+		printf("\nSaving new config! ");
 
 		if ( tcsetattr(*fd,TCSANOW,&newtio) == -1)
 		{
@@ -150,13 +147,13 @@
 		}
 		//***************************************************************
 
-		printf("Configuration set\n");
+		printf("\nConfiguration set");
 	}
 	//*********************************************************************************************
 
 	//************* Reset the serial port configuration *****************
 	void resetConfiguration(int * fd, struct termios * oldtio) {
-		printf("Restoring default config");
+		printf("\nRestoring default config");
 
 		//Sleep before reseting the configuration to prevent errors in communication
 		sleep(1);
@@ -174,34 +171,36 @@
 	void triggerAlarm() {
 		*flagPointer = TRUE;
 		*countPointer = *countPointer + 1;
-		printf("Timeout Expired: %ds\n", TIMEOUT);
+		printf("\nTimeout Expired: %ds", TIMEOUT);
 	}
 	//************************************************
 
-	int ll_open(int * flag, int * stop, int * count, int fd, char side, char * port, struct termios * oldtio) {
+	int ll_open(int * flag, int * stop, int * count, int * fd, char side, char * port, struct termios * oldtio) {
 
-		configure(&fd, port, oldtio);
+		printf("\nStarted ll_open()");
+
+		configure(fd, port, oldtio);
 
 		flagPointer = flag;
 		countPointer = count;
 
 		//*********** While cycle to control the sending of the message **************
 		if (side == 'W') {
-			printf("\nThis is the sender...\n");
+			printf("\nThis is the sender...");
 
-			tcflush(fd, TCIFLUSH);
+			tcflush(*fd, TCIFLUSH);
 			while(*count < ATTEMPTS) {
 
 				if(&flag) {
 					alarm(TIMEOUT);
 
-					printf("\nAttempts remaining: %d \n", (ATTEMPTS - *count - 1));
-					writeMsg(&fd, A, C_SET);
-					tcflush(fd, TCIFLUSH);
+					printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
+					writeMsg(fd, A_1, C_SET);
+					tcflush(*fd, TCIFLUSH);
 					*flag = FALSE;
-					printf("waiting...\n");
-					if(readResponse(&fd, flag, A, C_UA) == 0) {
-						printf("-> Response received!\n");
+					printf("\nwaiting...");
+					if(readResponse(fd, flag, A_1, C_UA) == 0) {
+						printf("\n-> Response received!");
 						break;
 					}
 				}
@@ -209,18 +208,59 @@
 			//****************************************************************************
 		}
 		else if (side == 'R') {
-			printf("\nThis is the receiver\n");
-
+			printf("\nThis is the receiver");
 			int flagT = FALSE;
-
-			//**** While that controls the reception of the info as well as the possible errors ****
-			while (readResponse(&fd, &flagT, A, C_SET) != 0) {
-				continue;
-			}
-			//**************************************************************************************
-
-			writeMsg(&fd, A, C_UA);
+			tcflush(*fd, TCIFLUSH);
+			while (readResponse(fd, &flagT, A_1, C_SET) != 0) { continue; }
+			writeMsg(fd, A_1, C_UA);
 		}
 
-		resetConfiguration(&fd, oldtio);
+		printf("\nFinished ll_open()");
+	}
+
+	int ll_close(int * flag, int * stop, int * count, int * fd, char side, char * port, struct termios * oldtio) {
+
+		printf("\nStarted ll_close()");
+
+		flagPointer = flag;
+		countPointer = count;
+
+		//*********** While cycle to control the sending of the message **************
+		if (side == 'W') {
+			printf("\nWill send DISC...");
+
+			tcflush(*fd, TCIFLUSH);
+			while(*count < ATTEMPTS) {
+
+				if(&flag) {
+					alarm(TIMEOUT);
+
+					printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
+					writeMsg(fd, A_1, C_DISC);
+					tcflush(*fd, TCIFLUSH);
+					*flag = FALSE;
+					printf("\nwaiting...");
+					if(readResponse(fd, flag, A_2, C_DISC) == 0) {
+						printf("\n-> Response received!");
+						break;
+					}
+				}
+			}
+
+			printf("\nSending last message (C_UA)");
+			writeMsg(fd, A_2, C_UA);
+			//****************************************************************************
+		}
+		else if (side == 'R') {
+			printf("\nWill receive DISC and respond the same");
+			int flagT = FALSE;
+			tcflush(*fd, TCIFLUSH);
+			while (readResponse(fd, &flagT, A_1, C_DISC) != 0) { continue; }
+			writeMsg(fd, A_2, C_DISC);
+			while (readResponse(fd, &flagT, A_2, C_UA) != 0) { continue; }
+		}
+
+		resetConfiguration(fd, oldtio);
+
+		printf("\nFinished ll_close()");
 	}
