@@ -10,7 +10,7 @@
 
 	#define BAUDRATE B9600
 	#define MODEMDEVICE "/dev/ttyS0"
-	#define _POSIX_SOURCE 1 // POSIX compliant source 
+	#define _POSIX_SOURCE 1 // POSIX compliant source
 	#define FALSE 0
 	#define TRUE 1
 
@@ -28,9 +28,9 @@
 
 	#define UALENGTH 5
 
-	void writeMsg(int * fd);
+	void writeMsg(int * fd, char aFlag, char cFlag);
 
-	int readResponse(int * fd, int * flag);
+	int readResponse(int * fd, int * flag, char aFlag, char cFlag);
 
 	void configure(int * fd, char * serial_port, struct termios * oldtio);
 
