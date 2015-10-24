@@ -4,8 +4,12 @@
 	int * count;
 	int * stop;
 
+	applicationLayer * al;
+
 	int main(int argc, char** argv)
 	{
+		al = malloc(sizeof(applicationLayer));
+
 		count = malloc(sizeof(int));
 		flag = malloc(sizeof(int));
 		stop = malloc(sizeof(int));
@@ -29,12 +33,14 @@
 
 		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
-		ll_open(flag, stop, count, &fd, *argv[2], port, &oldtio);
-		ll_close(flag, stop, count, &fd, *argv[2], port, &oldtio);
+		ll_open(flag, stop, count, al, *argv[2], port, &oldtio);
+		ll_close(flag, stop, count, al, *argv[2], port, &oldtio);
 
 		free(count);
 		free(flag);
 		free(stop);
+
+		free(al);
 
 		printf("\nTerminated!\n");
 
