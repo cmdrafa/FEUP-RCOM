@@ -5,10 +5,13 @@
 	int * stop;
 
 	applicationLayer * al;
+	linkLayer * ll;
 
 	int main(int argc, char** argv)
 	{
 		al = malloc(sizeof(applicationLayer));
+		ll = malloc(sizeof(linkLayer));
+		fillLinkLayer();
 
 		count = malloc(sizeof(int));
 		flag = malloc(sizeof(int));
@@ -27,22 +30,31 @@
 		}
 		//****************************************************************************************
 
-		char port[strlen(argv[1]) + 1];
-		strncpy(port, argv[1], strlen(argv[1]));
-		port[strlen(port)] = '\0';
+	  (*al).status = *argv[2];
+
+		strncpy((*ll).port, argv[1], strlen(argv[1]));
+		(*ll).port[strlen(argv[1])] = '\0';
 
 		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
-		ll_open(flag, stop, count, al, *argv[2], port, &oldtio);
-		ll_close(flag, stop, count, al, *argv[2], port, &oldtio);
+		ll_open(flag, stop, count, al, ll, &oldtio);
+		ll_close(flag, stop, count, al, ll, &oldtio);
 
 		free(count);
 		free(flag);
 		free(stop);
 
 		free(al);
+		free(ll);
 
 		printf("\nTerminated!\n");
 
 		return 0;
+	}
+
+	void fillLinkLayer() {
+		(*ll).baudRate = BAUDRATE;
+		(*ll).sequenceNumber = 0;
+		(*ll).timeout = TIMEOUT;
+		(*ll).numTransmissions = ATTEMPTS;
 	}

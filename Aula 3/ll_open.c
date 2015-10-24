@@ -106,18 +106,18 @@
 	}
 
 	//************** Function to configure the port and store the old configurations **************
-	void configure(applicationLayer * al, char * serial_port, struct termios * oldtio) {
+	void configure(applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
 
 		//Initialized variable to set the new config to the port
 		struct termios newtio;
 		printf("\nConfiguration started!");
 
 		//Open the serial port
-		al->fd = open(serial_port, O_RDWR | O_NOCTTY | O_NONBLOCK );
+		al->fd = open((*ll).port, O_RDWR | O_NOCTTY | O_NONBLOCK );
 
 		//Check for errors of opening the port
 		if (al->fd <0) {
-			perror(serial_port);
+			perror((*ll).port);
 			exit(-1);
 		}
 
@@ -130,7 +130,7 @@
 
 		//***** Set the new configuration of the port *******************
 		bzero(&newtio, sizeof(newtio));
-		newtio.c_cflag = BAUDRATE | CS8 | CLOCAL | CREAD;
+		newtio.c_cflag = (*ll).baudRate | CS8 | CLOCAL | CREAD;
 		newtio.c_iflag = IGNPAR;
 		newtio.c_oflag = OPOST;
 		// set input mode (non-canonical, no echo,...)
@@ -175,17 +175,17 @@
 	}
 	//************************************************
 
-	int ll_open(int * flag, int * stop, int * count, applicationLayer * al, char side, char * port, struct termios * oldtio) {
+	int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
 
 		printf("\n----------------------------------------------------\nStarted ll_open()");
 
-		configure(al, port, oldtio);
+		configure(al, ll, oldtio);
 
 		flagPointer = flag;
 		countPointer = count;
 
 		//*********** While cycle to control the sending of the message **************
-		if (side == 'W') {
+		if ((*al).status == 'W') {
 			printf("\nThis is the sender...");
 
 			tcflush((*al).fd, TCIFLUSH);
@@ -208,7 +208,7 @@
 			}
 			//****************************************************************************
 		}
-		else if (side == 'R') {
+		else if ((*al).status == 'R') {
 			printf("\nThis is the receiver");
 			int flagT = FALSE;
 			tcflush((*al).fd, TCIFLUSH);
@@ -219,7 +219,7 @@
 		printf("\n----------------------------------------------------\nFinished ll_open()");
 	}
 
-	int ll_close(int * flag, int * stop, int * count, applicationLayer * al, char side, char * port, struct termios * oldtio) {
+	int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
 
 		printf("\n----------------------------------------------------\nStarted ll_close()");
 
@@ -227,7 +227,7 @@
 		countPointer = count;
 
 		//*********** While cycle to control the sending of the message **************
-		if (side == 'W') {
+		if ((*al).status == 'W') {
 			printf("\nWill send DISC...");
 
 			tcflush((*al).fd, TCIFLUSH);
@@ -252,7 +252,7 @@
 			writeMsg(al, A_2, C_UA);
 			//****************************************************************************
 		}
-		else if (side == 'R') {
+		else if ((*al).status == 'R') {
 			printf("\nWill receive DISC and respond the same");
 			int flagT = FALSE;
 			tcflush((*al).fd, TCIFLUSH);
