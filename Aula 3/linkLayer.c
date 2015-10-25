@@ -364,7 +364,13 @@
 		int bufSize = 0;
 		char *toSendStuffed = stuff(toSend, ((length + 1) * 2) + 5, &bufSize);
 		
-		
+		int asd = 0;
+		char * dd = toSendStuffed;
+		while (asd < bufSize) {
+			printf("\n0x%x", *dd);
+			dd++;
+			asd++;
+		}
 		
 		*countPointer = 0;
 		//*********** While cycle to control the sending of the message **************
@@ -421,6 +427,7 @@
 			res = read((*al).fd,&readChar,1); // returns after 1 char input
 
 			if (!*flagPointer && (res == 1)) {
+							printf("\nTrying to read charRead: 0x%x\n", readChar);
 				switch (stateMachine) {
 					case 0:
 						if (readChar == FLAG) {
