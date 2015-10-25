@@ -316,6 +316,8 @@
 		
 		int sizeOfInfoRead = unStuff(buffer_2, buffer);
 		
+		sizeOfInfoRead = removeFrameHeaderAndTrailer(buffer, sizeOfInfoRead);
+		
 		writeMsg(al, A_1, C_RR_1);
 		
 		free(buffer_2);
@@ -574,4 +576,17 @@
 		free(temp);
 				
 		return stuffedC;
+	}
+
+	int removeFrameHeaderAndTrailer(char ** buffer, int sizeOfInfoRead) {
+	  char * finalB = malloc(sizeof(char) * (sizeOfInfoRead - 6));
+	  
+	  int counter = 4;
+	  	  
+	  strncpy(finalB, (*buffer + counter), sizeOfInfoRead - 6);
+	  
+	  free(*buffer);
+	  *buffer = finalB;
+
+	  return sizeOfInfoRead - 6;
 	}

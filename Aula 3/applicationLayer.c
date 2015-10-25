@@ -7,8 +7,7 @@
 	applicationLayer * al;
 	linkLayer * ll;
 
-	int main(int argc, char** argv)
-	{
+	int main(int argc, char** argv) {
 		al = malloc(sizeof(applicationLayer));
 		ll = malloc(sizeof(linkLayer));
 		fillLinkLayer();
@@ -51,16 +50,17 @@
 			printf("\n______________________________Receiving control packet 1____________________________________\n");
 			
 			char * packet_1;
-			int sizeOfInfoRead = llread(al, ll, &packet_1);
+			int sizeOfPacket = llread(al, ll, &packet_1);
 			
 			printf("\n\nRECEIVED :-D\n\n");
 			
-			printf("\nSize is: %d", sizeOfInfoRead);
+			printf("\nSize is: %d\n", sizeOfPacket);
 			int asd = 0;
-			while (asd < sizeOfInfoRead) {
-			    printf("\n0x%x", *(packet_1 + asd));
+			while (asd < sizeOfPacket) {
+			    printf("%c", *(packet_1 + asd));
 			    asd++; 
 			}
+			printf("\n");
 			
 			free(packet_1);
 			

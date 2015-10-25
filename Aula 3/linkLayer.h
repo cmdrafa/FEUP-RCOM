@@ -25,3 +25,5 @@
 	int readInfo(applicationLayer * al, int * flag, char * buffer);
 	
 	int unStuff(char * unstuffed, char ** stuffed);
+
+	int removeFrameHeaderAndTrailer(char ** buffer, int sizeOfInfoRead);
