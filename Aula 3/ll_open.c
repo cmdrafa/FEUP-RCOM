@@ -26,7 +26,6 @@
 	int readResponse(applicationLayer * al, int * flag, char aFlag, char cFlag) {
 
 		int res;
-		int i = 0;
 		char response[5];
 
 		//************* While that controls the reading of the response of the receiver *********

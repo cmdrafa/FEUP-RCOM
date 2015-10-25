@@ -20,7 +20,6 @@
 		*flag = TRUE;
 		*stop = FALSE;
 
-		int fd;
 		struct termios oldtio;
 		//********************* Check if the arguments are corrected *****************************
 		if ( (argc < 3) || ((strcmp("/dev/ttyS0", argv[1])!=0) && (strcmp("/dev/ttyS1", argv[1])!=0) &&	(strcmp("/dev/ttyS4", argv[1])!=0)))
