@@ -19,3 +19,9 @@
 	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length);
 	
 	char * stuff(char *unStuffed, int totalLength);
+	
+	int llread(applicationLayer * al, linkLayer * ll, char * buffer);
+	
+	int readInfo(applicationLayer * al, int * flag, char * buffer);
+	
+	int unStuff(char * unstuffed, char * stuffed);

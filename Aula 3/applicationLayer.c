@@ -37,6 +37,29 @@
 		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
 		ll_open(flag, stop, count, al, ll, &oldtio);
+		
+		if ((*al).status == 'W') {
+			printf("\n______________________________Sending control packet 1____________________________________\n");
+			
+			char * packet_1 = createFirstControlPacket();
+			llwrite(stop, al, ll, packet_1, 6);
+			free(packet_1);
+			
+			printf("\n______________________________Sent control packet 1_______________________________________\n");
+		}
+		else if ((*al).status == 'R') {
+			printf("\n______________________________Receiving control packet 1____________________________________\n");
+			
+			char * packet_1;
+			llread(al, ll, packet_1);
+			
+			printf("\n\nRECEIVED :-D\n\n%s\n\n", packet_1);
+			
+			free(packet_1);
+			
+			printf("\n______________________________Received control packet 1_______________________________________\n");
+		}
+		
 		ll_close(flag, stop, count, al, ll, &oldtio);
 
 		free(count);
@@ -56,4 +79,11 @@
 		(*ll).sequenceNumber = 0;
 		(*ll).timeout = TIMEOUT;
 		(*ll).numTransmissions = ATTEMPTS;
+	}
+	
+	char * createFirstControlPacket() {
+		char * control = malloc(sizeof(char) * 6);
+		char con[] = "003Pin";
+		strcpy(control, con);
+		return control;
 	}

@@ -2,7 +2,9 @@
 
 	int * flagPointer;
 	int * countPointer;
-
+	
+	linkLayer ll;
+	
 	//*********************** Function to send the message **************************
 	void writeMsg(applicationLayer * al, char aFlag, char cFlag) {
 		printf("\nSending!");
@@ -96,6 +98,39 @@
 				break;
 		}
 
+		//***************************************************************************************
+
+		if(*flag)
+			return -1;
+
+		return 0;
+	}
+	
+	//************** Read the response of the receiver ******************************
+	int readInfo(applicationLayer * al, int * flag, char * buffer) {
+
+		int res;
+		int end = FALSE;
+		char * bufferP = buffer;
+		int c = 0;
+
+		//************* While that controls the reading of the response of the receiver *********
+		while (end == FALSE) { // state machine control
+			char readChar;
+			res = read((*al).fd,&readChar,1); // returns after 1 char input
+
+			if (!*flag && (res == 1)) {
+				*bufferP = readChar;
+				if (c > 3) {
+					if (*bufferP == FLAG) {
+						end = TRUE;
+					}
+				}		
+				c++;
+			}
+			else if (*flag)
+				break;
+		}
 		//***************************************************************************************
 
 		if(*flag)
@@ -265,10 +300,28 @@
 		printf("\n----------------------------------------------------\nFinished ll_close()");
 	}
 	
+	int llread(applicationLayer * al, linkLayer * ll, char * buffer) {
+		int flagT = FALSE;
+		tcflush((*al).fd, TCIFLUSH);
+		
+		char * buffer_2 = malloc(sizeof(char) * MAX_SIZE * 2);
+		
+		while (readInfo(al, &flagT, buffer_2) != 0) {
+			continue;
+		}
+		
+		unStuff(buffer_2, buffer);
+		
+		free(buffer_2);
+		
+		
+	}
+	
 	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
 		
 		//Fill the toSend char array
-		char * toSend = malloc(sizeof(char) * (length + 6));
+		char * toS = malloc(sizeof(char) * (length + 6));
+		char toSend[length + 6];
 		toSend[0] = FLAG;
 		toSend[1] = A_1;
 		
@@ -292,6 +345,8 @@
 		toSend[length + 4] = toSend[3];
 		toSend[length + 5] = FLAG;
 		
+		strcpy(toS, toSend);
+		
 		//Finished filling the char array
 		
 		char *toSendStuffed = stuff(toSend, ((length + 1) * 2) + 5);
@@ -304,7 +359,7 @@
 				alarm(TIMEOUT);
 				printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
 				tcflush((*al).fd, TCOFLUSH); // Clean output buffer
-				write(al->fd, toSend, strlen(toSend)); //Sending the info
+				write(al->fd, toS, strlen(toSend)); //Sending the info
 	
 				//*******************************************
 				tcflush((*al).fd, TCIFLUSH);
@@ -334,10 +389,10 @@
 			}
 		}
 		free(toSendStuffed);
-		free(toSend);
+		free(toS);
 		//****************************************************************************
 	}
-
+	
 	//************** Read the response of the receiver ******************************
 	int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 
@@ -460,4 +515,35 @@
 			j++;
 		}
 		return toRet;
+	}
+	
+	int unStuff(char * unstuffed, char * stuffed) {
+		char * temp = malloc(sizeof(char) * MAX_SIZE * 2);
+		char * tempo = temp;
+		
+		int stuffedC = 0;
+		int unstuffedC = 0;
+		int end = FALSE;
+		while (end == FALSE) {
+			if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == FLAG_EXC)) {
+				(*tempo) = FLAG;
+				unstuffed++;
+			}
+			else if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == ESCAPE_EXC)) {
+				(*tempo) = ESCAPE;
+				unstuffed++;
+			}
+			else {
+				(*tempo) = (*unstuffed);	
+			}
+			
+			unstuffed++;
+			tempo++;
+			stuffedC++;
+			unstuffedC++;
+		}
+		
+		stuffed = malloc(sizeof(char) * stuffedC);
+		strncpy(stuffed, temp, stuffedC);
+		free(temp);
 	}
