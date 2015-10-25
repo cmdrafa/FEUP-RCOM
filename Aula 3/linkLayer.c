@@ -29,13 +29,14 @@
 
 		int res;
 		char response[5];
-
+		
+		
 		//************* While that controls the reading of the response of the receiver *********
 		unsigned int stateMachine = 0;
 		while (stateMachine < 5) { // state machine control
 			char readChar;
 			res = read((*al).fd,&readChar,1); // returns after 1 char input
-
+			
 			if (!*flag && (res == 1)) {
 				switch (stateMachine) {
 					case 0:
@@ -289,7 +290,7 @@
 			//****************************************************************************
 		}
 		else if ((*al).status == 'R') {
-			printf("\nWill receive DISC and respond the same");
+			printf("\nWill receive DISC and respond the same\n");
 			int flagT = FALSE;
 			tcflush((*al).fd, TCIFLUSH);
 			while (readResponse(al, &flagT, A_1, C_DISC) != 0) { continue; }
@@ -302,7 +303,7 @@
 		printf("\n----------------------------------------------------\nFinished ll_close()");
 	}
 	
-	int llread(applicationLayer * al, linkLayer * ll, char * buffer) {
+	int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 		int flagT = FALSE;
 		tcflush((*al).fd, TCIFLUSH);
 		
@@ -315,18 +316,10 @@
 		
 		int sizeOfInfoRead = unStuff(buffer_2, buffer);
 		
-					//TODO ------- PROBLEM SOLVED UNTIL HERE -------------
-
+		writeMsg(al, A_1, C_RR_1);
+		
 		free(buffer_2);
-		
-		char * poi = buffer;
-		int asd = 0;
-		while (asd < sizeOfInfoRead) {
-			printf("\n0x%x", *poi);
-			poi++; asd++; 
-		}
-		
-		
+		return sizeOfInfoRead;
 	}
 	
 	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
@@ -387,6 +380,8 @@
 				*flagPointer = FALSE;
 				
 				//TODO - test the response of the buffer
+				
+				printf("\nactual seqnum: %x\n", (*ll).sequenceNumber);
 				int resp = readSenderResponse(al, ll);
 				if(resp == 0) {
 					(*ll).sequenceNumber = 0;
@@ -543,39 +538,40 @@
 		return toRet;
 	}
 	
-	int unStuff(char * unstuffed, char * stuffed) {
+	int unStuff(char * unstuffed, char ** stuffed) {
 		char * temp = malloc(sizeof(char) * MAX_SIZE * 2);
-		char * tempo = temp;
 		
 		int stuffedC = 0;
-		int unstuffedC = 0;
 		int end = FALSE;
 		while (end == FALSE) {
 
 			if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == FLAG_EXC)) {
-				(*tempo) = FLAG;
+				(*(temp + stuffedC)) = FLAG;
 				unstuffed++;
 			}
 			else if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == ESCAPE_EXC)) {
-				(*tempo) = ESCAPE;
+				(*(temp + stuffedC)) = ESCAPE;
 				unstuffed++;
 			}
 			else {
-				(*tempo) = (*unstuffed);	
+				(*(temp + stuffedC)) = (*unstuffed);	
 			}
 
-			if (*tempo == FLAG) {
+			if ((stuffedC > 2) && (*(temp + stuffedC) == FLAG)) {
 				end = TRUE;	
 			}
-			
+						
 			unstuffed++;
-			tempo++;
 			stuffedC++;
-			unstuffedC++;
 		}
 		
-		stuffed = malloc(sizeof(char) * stuffedC);
-		strncpy(stuffed, temp, stuffedC);
+		*stuffed = malloc(sizeof(char) * stuffedC);
+		int i = 0;
+		while (i < stuffedC) {
+		  *(*stuffed + i) = *(temp + i);
+		  i++;
+		}
 		free(temp);
+				
 		return stuffedC;
 	}
