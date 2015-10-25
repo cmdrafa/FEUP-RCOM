@@ -13,3 +13,7 @@
 	int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio);
 
 	int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio);
+
+	int readSenderResponse(applicationLayer * al, linkLayer * ll);
+
+	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length);

@@ -312,13 +312,95 @@
 				tcflush((*al).fd, TCIFLUSH);
 				*flagPointer = FALSE;
 				
-				//TODO - do and test the response of the buffer
-				if(readResponse(al, flagPointer, A_1, C_UA) == 0) {
-					printf("\n-> Response received!");
+				//TODO - test the response of the buffer
+				if(readSenderResponse(al, ll) == 0) {
+					printf("\n-> Correct Response received!");
 					break;
 				}
 				//*******************************************
 			}
 		}
 		//****************************************************************************
+	}
+
+	//************** Read the response of the receiver ******************************
+	int readSenderResponse(applicationLayer * al, linkLayer * ll) {
+
+		int res;
+		char response[5];
+
+		//************* While that controls the reading of the response of the receiver *********
+		unsigned int stateMachine = 0;
+		while (stateMachine < 5) { // state machine control
+			char readChar;
+			res = read((*al).fd,&readChar,1); // returns after 1 char input
+
+			if (!*flagPointer && (res == 1)) {
+				switch (stateMachine) {
+					case 0:
+						if (readChar == FLAG) {
+							response[stateMachine] = readChar;
+							stateMachine = 1;
+						}
+						break;
+					case 1:
+						if (readChar == FLAG) {
+							break;
+						} else if (readChar == A_1) {
+							response[stateMachine] = readChar;
+							stateMachine = 2;
+							break;
+						} else {
+							stateMachine = 0;
+							break;
+						}
+					case 2:
+						if (readChar == FLAG) {
+							stateMachine = 1;
+							break;
+						} else if ((readChar == C_RR_0 && (*ll).sequenceNumber == 1) || (readChar == C_RR_1 && (*ll).sequenceNumber == 0)) {
+							response[stateMachine] = readChar;
+							stateMachine = 3;
+							break;
+						} else {
+							stateMachine = 0;
+							break;
+						}
+					case 3:
+					  if (readChar == FLAG) {
+							stateMachine = 1;
+							break;
+						} else if (readChar == (response[1]^response[2])) {
+							response[stateMachine] = readChar;
+							stateMachine = 4;
+							break;
+						} else {
+							stateMachine = 0;
+							break;
+						}
+					case 4:
+						switch(readChar) {
+							case FLAG:
+								response[stateMachine] = readChar;
+								printf("\nCorrect response read: ");
+								printf("\n                              0x%x, 0x%x, 0x%x, 0x%x, 0x%x.", response[0], response[1], response[2], response[3], response[4]);
+								stateMachine = 5;
+								break;
+							default:
+								stateMachine = 0;
+								break;
+						}
+						break;
+				}
+			}
+			else if (*flagPointer)
+				break;
+		}
+
+		//***************************************************************************************
+
+		if(*flagPointer)
+			return -1;
+
+		return 0;
 	}
