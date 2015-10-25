@@ -336,7 +336,7 @@
 		
 		unsigned int j = 0;
 		
-		while (j < length) {
+		while (j < length) {			
 			toSend[j + 4] = *buffer;
 			buffer++;
 			j++;
@@ -349,7 +349,10 @@
 		
 		//Finished filling the char array
 		
-		char *toSendStuffed = stuff(toSend, ((length + 1) * 2) + 5);
+		int bufSize = 0;
+		char *toSendStuffed = stuff(toSend, ((length + 1) * 2) + 5, &bufSize);
+		
+		
 		
 		*countPointer = 0;
 		//*********** While cycle to control the sending of the message **************
@@ -359,7 +362,7 @@
 				alarm(TIMEOUT);
 				printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
 				tcflush((*al).fd, TCOFLUSH); // Clean output buffer
-				write(al->fd, toS, strlen(toSend)); //Sending the info
+				write(al->fd, toSendStuffed, bufSize); //Sending the info
 	
 				//*******************************************
 				tcflush((*al).fd, TCIFLUSH);
@@ -488,7 +491,7 @@
 		}
 	}
 	
-	char * stuff(char * unStuffed, int totalLength) {
+	char * stuff(char * unStuffed, int totalLength, int * bufSize) {
 		char * toRet = malloc(sizeof(char) * totalLength);
 		int unStuffedLength = ((totalLength - 5) / 2) + 5;
 		int i = 4;
@@ -497,7 +500,7 @@
 			toRet[j] = unStuffed[j];
 			j++;
 		}
-		while (i < unStuffedLength) {
+		while (i < (unStuffedLength - 1)) {
 			if (unStuffed[i] == FLAG) {
 				toRet[j] = ESCAPE;
 				j++;
@@ -514,6 +517,10 @@
 			i++;
 			j++;
 		}
+		toRet[j] = FLAG;
+		j++;
+		
+		*bufSize = j;
 		return toRet;
 	}
 	
