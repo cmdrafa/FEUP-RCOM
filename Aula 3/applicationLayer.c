@@ -51,9 +51,16 @@
 			printf("\n______________________________Receiving control packet 1____________________________________\n");
 			
 			char * packet_1;
-			llread(al, ll, packet_1);
+			int sizeOfInfoRead = llread(al, ll, &packet_1);
 			
-			printf("\n\nRECEIVED :-D\n\n%s\n\n", packet_1);
+			printf("\n\nRECEIVED :-D\n\n");
+			
+			printf("\nSize is: %d", sizeOfInfoRead);
+			int asd = 0;
+			while (asd < sizeOfInfoRead) {
+			    printf("\n0x%x", *(packet_1 + asd));
+			    asd++; 
+			}
 			
 			free(packet_1);
 			
