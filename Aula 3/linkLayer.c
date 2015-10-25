@@ -121,22 +121,24 @@
 
 			if (!*flag && (res == 1)) {
 				*bufferP = readChar;
+
 				if (c > 3) {
-					if (*bufferP == FLAG) {
+					if ((*bufferP) == FLAG) {
 						end = TRUE;
 					}
 				}		
 				c++;
+				bufferP++;
 			}
 			else if (*flag)
 				break;
 		}
 		//***************************************************************************************
-
+		
 		if(*flag)
 			return -1;
 
-		return 0;
+		return c;
 	}
 
 	//************** Function to configure the port and store the old configurations **************
@@ -306,13 +308,23 @@
 		
 		char * buffer_2 = malloc(sizeof(char) * MAX_SIZE * 2);
 		
-		while (readInfo(al, &flagT, buffer_2) != 0) {
-			continue;
+		int nRead = -1;
+		while (nRead < 0) {
+			nRead = readInfo(al, &flagT, buffer_2);
 		}
 		
-		unStuff(buffer_2, buffer);
+		int sizeOfInfoRead = unStuff(buffer_2, buffer);
 		
+					//TODO ------- PROBLEM SOLVED UNTIL HERE -------------
+
 		free(buffer_2);
+		
+		char * poi = buffer;
+		int asd = 0;
+		while (asd < sizeOfInfoRead) {
+			printf("\n0x%x", *poi);
+			poi++; asd++; 
+		}
 		
 		
 	}
@@ -525,6 +537,7 @@
 		int unstuffedC = 0;
 		int end = FALSE;
 		while (end == FALSE) {
+
 			if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == FLAG_EXC)) {
 				(*tempo) = FLAG;
 				unstuffed++;
@@ -536,6 +549,10 @@
 			else {
 				(*tempo) = (*unstuffed);	
 			}
+
+			if (*tempo == FLAG) {
+				end = TRUE;	
+			}
 			
 			unstuffed++;
 			tempo++;
@@ -546,4 +563,5 @@
 		stuffed = malloc(sizeof(char) * stuffedC);
 		strncpy(stuffed, temp, stuffedC);
 		free(temp);
+		return stuffedC;
 	}
