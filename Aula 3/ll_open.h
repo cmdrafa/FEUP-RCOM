@@ -17,3 +17,5 @@
 	int readSenderResponse(applicationLayer * al, linkLayer * ll);
 
 	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length);
+	
+	char * stuff(char *unStuffed, int totalLength);

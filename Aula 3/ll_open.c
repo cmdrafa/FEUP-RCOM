@@ -268,7 +268,7 @@
 	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
 		
 		//Fill the toSend char array
-		char toSend[length + 6];
+		char * toSend = malloc(sizeof(char) * (length + 6));
 		toSend[0] = FLAG;
 		toSend[1] = A_1;
 		
@@ -296,7 +296,7 @@
 		
 		//Finished filling the char array
 		
-		//NEEDS STUFFING THE ARRAY------------------------------------------TODO-------------------------------------------------
+		char *toSendStuffed = stuff(toSend, ((length + 1) * 2) + 5);
 		
 		*countPointer = 0;
 		//*********** While cycle to control the sending of the message **************
@@ -320,6 +320,8 @@
 				//*******************************************
 			}
 		}
+		free(toSendStuffed);
+		free(toSend);
 		//****************************************************************************
 	}
 
@@ -403,4 +405,33 @@
 			return -1;
 
 		return 0;
+	}
+	
+	char * stuff(char * unStuffed, int totalLength) {
+		char * toRet = malloc(sizeof(char) * totalLength);
+		int unStuffedLength = ((totalLength - 5) / 2) + 5;
+		int i = 4;
+		int j = 0;
+		while (j < 4) {
+			toRet[j] = unStuffed[j];
+			j++;
+		}
+		while (i < unStuffedLength) {
+			if (unStuffed[i] == FLAG) {
+				toRet[j] = ESCAPE;
+				j++;
+				toRet[j] = FLAG_EXC;
+			}
+			else if (unStuffed[i] == ESCAPE) {
+				toRet[j] = ESCAPE;
+				j++;
+				toRet[j] = ESCAPE_EXC;	
+			}
+			else {
+				toRet[j] = unStuffed[i];
+			}
+			i++;
+			j++;
+		}
+		return toRet;
 	}

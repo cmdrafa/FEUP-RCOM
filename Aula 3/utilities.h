@@ -30,6 +30,10 @@
 #define C_UA 0x03
 #define C_DISC 0x0b
 
+#define ESCAPE 0x7d
+#define FLAG_EXC 0x5e
+#define ESCAPE_EXC 0x5d
+
 #define BCC A^C_SET
 #define SETLEN 5
 #define TIMEOUT 3
