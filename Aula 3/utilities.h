@@ -18,6 +18,14 @@
 #define A_1 0x03
 #define A_2 0x01
 
+#define C_0 0x0
+#define C_1 0x20
+
+#define C_RR_0 0x1
+#define C_RR_1 0x21
+#define C_REJ_0 0x5
+#define C_REJ_1 0x25
+
 #define C_SET 0x07
 #define C_UA 0x03
 #define C_DISC 0x0b
@@ -26,6 +34,8 @@
 #define SETLEN 5
 #define TIMEOUT 3
 #define ATTEMPTS 3
+
+#define MAX_SIZE 256
 
 #define UALENGTH 5
 
@@ -41,5 +51,5 @@ typedef struct {
   unsigned int timeout;
   unsigned int numTransmissions;
 
-  //char frame[MAX_SIZE];
+  char frame[MAX_SIZE];
 } linkLayer;

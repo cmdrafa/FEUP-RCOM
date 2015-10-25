@@ -264,3 +264,61 @@
 
 		printf("\n----------------------------------------------------\nFinished ll_close()");
 	}
+	
+	int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
+		
+		//Fill the toSend char array
+		char toSend[length + 6];
+		toSend[0] = FLAG;
+		toSend[1] = A_1;
+		
+		if ((*ll).sequenceNumber == 0) {
+			(*ll).sequenceNumber = 1;
+			toSend[2] = C_1;
+		}
+		else {
+			(*ll).sequenceNumber = 0;
+			toSend[2] = C_0;
+		}
+		
+		toSend[3] = toSend[1] ^ toSend[2];
+		
+		unsigned int j = 0;
+		
+		while (j < length) {
+			toSend[j + 4] = *buffer;
+			buffer++;
+			j++;
+		}
+		
+		toSend[length + 4] = toSend[3];
+		toSend[length + 5] = FLAG;
+		
+		//Finished filling the char array
+		
+		//NEEDS STUFFING THE ARRAY------------------------------------------TODO-------------------------------------------------
+		
+		*countPointer = 0;
+		//*********** While cycle to control the sending of the message **************
+		tcflush((*al).fd, TCIFLUSH);
+		while(*countPointer < (*ll).numTransmissions) {
+			if(&flagPointer) {
+				alarm(TIMEOUT);
+				printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
+				tcflush((*al).fd, TCOFLUSH); // Clean output buffer
+				write(al->fd, toSend, strlen(toSend)); //Sending the info
+	
+				//*******************************************
+				tcflush((*al).fd, TCIFLUSH);
+				*flagPointer = FALSE;
+				
+				//TODO - do and test the response of the buffer
+				if(readResponse(al, flagPointer, A_1, C_UA) == 0) {
+					printf("\n-> Response received!");
+					break;
+				}
+				//*******************************************
+			}
+		}
+		//****************************************************************************
+	}
