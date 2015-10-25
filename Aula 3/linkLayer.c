@@ -1,4 +1,4 @@
-	#include "ll_open.h"
+	#include "linkLayer.h"
 
 	int * flagPointer;
 	int * countPointer;
@@ -273,12 +273,10 @@
 		toSend[1] = A_1;
 		
 		if ((*ll).sequenceNumber == 0) {
-			(*ll).sequenceNumber = 1;
-			toSend[2] = C_1;
+			toSend[2] = C_0;
 		}
 		else {
-			(*ll).sequenceNumber = 0;
-			toSend[2] = C_0;
+			toSend[2] = C_1;
 		}
 		
 		toSend[3] = toSend[1] ^ toSend[2];
@@ -313,8 +311,23 @@
 				*flagPointer = FALSE;
 				
 				//TODO - test the response of the buffer
-				if(readSenderResponse(al, ll) == 0) {
+				int resp = readSenderResponse(al, ll);
+				if(resp == 0) {
+					(*ll).sequenceNumber = 0;
 					printf("\n-> Correct Response received!");
+					break;
+				}
+				else if(resp == 1) {
+					(*ll).sequenceNumber = 1;
+					printf("\n-> Correct Response received!");
+					break;
+				}
+				else if (resp == -2) {
+					(*ll).sequenceNumber == 0;
+					break;
+				}
+				else if (resp == -3) {
+					(*ll).sequenceNumber = 1;
 					break;
 				}
 				//*******************************************
@@ -364,6 +377,10 @@
 							response[stateMachine] = readChar;
 							stateMachine = 3;
 							break;
+						} else if ((readChar == C_REJ_0) || (readChar == C_REJ_1)) {
+							response[stateMachine] = readChar;
+							stateMachine = 3;
+							break;
 						} else {
 							stateMachine = 0;
 							break;
@@ -403,8 +420,17 @@
 
 		if(*flagPointer)
 			return -1;
-
-		return 0;
+		
+		if (response[2] == C_REJ_0)
+			return -2;
+		else if (response[2] == C_REJ_1)
+			return -3;
+		else if (response[2] == C_RR_0) {
+			return 0;
+		}
+		else if (response[2] == C_RR_1) {
+			return 1;
+		}
 	}
 	
 	char * stuff(char * unStuffed, int totalLength) {

@@ -1,2 +1,2 @@
-all: app.c ll_open.c
-	gcc -o proj app.c ll_open.c
+all: applicationLayer.c linkLayer.c
+	gcc -o proj applicationLayer.c linkLayer.c
