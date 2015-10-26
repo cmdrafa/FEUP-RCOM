@@ -262,6 +262,8 @@
 
 		flagPointer = flag;
 		countPointer = count;
+		
+		*flagPointer = FALSE;
 
 		//*********** While cycle to control the sending of the message **************
 		if ((*al).status == 'W') {
@@ -318,7 +320,13 @@
 		
 		sizeOfInfoRead = removeFrameHeaderAndTrailer(buffer, sizeOfInfoRead);
 		
-		writeMsg(al, A_1, C_RR_1);
+		if ((*ll).sequenceNumber == 0) {
+		  writeMsg(al, A_1, C_RR_1);
+		  (*ll).sequenceNumber = 1;
+		} else {
+		  writeMsg(al, A_1, C_RR_0);
+		  (*ll).sequenceNumber = 0;
+		}
 		
 		free(buffer_2);
 		return sizeOfInfoRead;

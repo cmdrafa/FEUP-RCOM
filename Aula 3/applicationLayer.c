@@ -123,21 +123,27 @@
 	  char * packet_1;
 	  int sizeOfPacket = llread(al, ll, &packet_1);
 	  
-	  while (1 == 1) {
+	  int cn = FALSE;
+	  while (cn == FALSE) {
 	    
 	    int i = 0;
+	    printf("\n");
 	    while (i < sizeOfPacket) {
 	      printf("%c", *(packet_1 + i));
+	      i++;
 	    }
-	    
-	    if (*packet_1 != 2)
-	      break;
+	    printf("\n");
 	    
 	    printf("\nSize of packet is: %d\n", sizeOfPacket);
-	
+	    printf("\n");
+	    
 	    free(packet_1);
 	    sizeOfPacket = llread(al, ll, &packet_1);
 	    
-	    printf("\n");
+	    if (*packet_1 == 2) {
+	      cn = TRUE;
+	    }
 	  }
+	  
+	  return 0;
 	}
