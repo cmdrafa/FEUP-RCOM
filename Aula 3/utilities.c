@@ -14,3 +14,4 @@ int getFileSize(FILE* file) {
 
 	return size;
 }
+

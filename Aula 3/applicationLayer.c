@@ -58,7 +58,7 @@
 			  perror("readFile");
 			  return -1;
 			}
-			
+						
 			printf("\n______________________________Received control packet 1_______________________________________\n");
 		}
 		
@@ -99,8 +99,10 @@
 	 int packetSize;
 	 
 	 FILE * pfd = fopen("./pinguim.gif", "r");
-	 
 	 int fileSize = getFileSize(pfd);
+	 char * fullFile = malloc(sizeof(char) * fileSize);
+	 char * fullFileStart = fullFile;
+	 fread(fullFile, fileSize, 1, pfd);
 	 char * fileSizeChar = malloc(sizeof(char) * 8);
 	 sprintf(fileSizeChar, "%d", fileSize);
 	 
@@ -112,11 +114,30 @@
 	 
 	 int sentBytes = 0;
 	 int packetCounter = 0;
-	 int numberOfPackets = fileSize / MAX_SIZE;
-	 if ((fileSize % MAX_SIZE) > 0)
+	 int numberOfPackets = fileSize / MAX_PACKET_SIZE;
+	 if ((fileSize % MAX_PACKET_SIZE) > 0)
 	   numberOfPackets++;
 	 while (packetCounter < numberOfPackets) {
 	  printf("\nPacket Number: %d\n", packetCounter);
+	  char * infoPacket = malloc(sizeof(char) * MAX_PACKET_SIZE);
+	  *infoPacket = '0';
+	  *(infoPacket + 1) = (char) packetCounter;
+	  char k = (char) (MAX_PACKET_SIZE - 4);
+	  uint8_t l1 = ((k & 0xFF00) >> 8);
+	  *(infoPacket + 2) = l1;
+	  uint8_t l2 = (k & 0x00FF); 
+	  *(infoPacket + 3) = l2;
+	  
+	  int i = 4;
+	  while (i < MAX_PACKET_SIZE && ((i*MAX_PACKET_SIZE + i) < fileSize)) {
+	   *(infoPacket + i) = *fullFile;
+	   fullFile++;
+	    i++;
+	  }
+	  
+	  llwrite(stop, al, ll, infoPacket, i);
+	  
+	  free(infoPacket);
 	  packetCounter++;
 	 }
 	 
@@ -124,7 +145,8 @@
 	 *packet_1 = '2';
 	 llwrite(stop, al, ll, packet_1, packetSize);
 	 
-	 free(packet_1); 
+	 free(packet_1);
+	 free(fullFileStart);
 	 fclose(pfd);
 	 return 0;
 	}
@@ -137,16 +159,7 @@
 	  while (cn == FALSE) {
 	    sizeOfPacket = llread(al, ll, &packet_1);
 	    	    
-	    int i = 0;
-	    printf("\n");
-	    while (i < sizeOfPacket) {
-	      printf("%c", *(packet_1 + i));
-	      i++;
-	    }
-	    printf("\n");
-	    
 	    printf("\nSize of packet is: %d\n", sizeOfPacket);
-	    printf("\n");
 	    
 	    if (*packet_1 == '2') {
 	      cn = TRUE;

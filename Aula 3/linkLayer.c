@@ -367,14 +367,6 @@
 		int bufSize = 0;
 		char *toSendStuffed = stuff(toSend, ((length + 1) * 2) + 5, &bufSize);
 		
-		int asd = 0;
-		char * dd = toSendStuffed;
-		while (asd < bufSize) {
-			printf("\n0x%x", *dd);
-			dd++;
-			asd++;
-		}
-		
 		*countPointer = 0;
 		//*********** While cycle to control the sending of the message **************
 		tcflush((*al).fd, TCIFLUSH);
@@ -388,10 +380,7 @@
 				//*******************************************
 				tcflush((*al).fd, TCIFLUSH);
 				*flagPointer = FALSE;
-				
-				//TODO - test the response of the buffer
-				
-				printf("\nactual seqnum: %x\n", (*ll).sequenceNumber);
+								
 				int resp = readSenderResponse(al, ll);
 				if(resp == 0) {
 					(*ll).sequenceNumber = 0;

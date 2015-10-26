@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <stdint.h>
 
 #define BAUDRATE B9600
 #define MODEMDEVICE "/dev/ttyS0"
@@ -40,7 +40,8 @@
 #define TIMEOUT 3
 #define ATTEMPTS 3
 
-#define MAX_SIZE 100
+#define MAX_SIZE 255
+#define MAX_PACKET_SIZE 100
 
 #define UALENGTH 5
 
@@ -60,3 +61,4 @@ typedef struct {
 } linkLayer;
 
 int getFileSize(FILE* file);
+
