@@ -40,7 +40,7 @@
 #define TIMEOUT 3
 #define ATTEMPTS 3
 
-#define MAX_SIZE 256
+#define MAX_SIZE 100
 
 #define UALENGTH 5
 

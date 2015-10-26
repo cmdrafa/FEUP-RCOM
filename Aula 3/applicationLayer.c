@@ -110,6 +110,16 @@
 	 //Sends First control packet
 	 llwrite(stop, al, ll, packet_1, packetSize);
 	 
+	 int sentBytes = 0;
+	 int packetCounter = 0;
+	 int numberOfPackets = fileSize / MAX_SIZE;
+	 if ((fileSize % MAX_SIZE) > 0)
+	   numberOfPackets++;
+	 while (packetCounter < numberOfPackets) {
+	  printf("\nPacket Number: %d\n", packetCounter);
+	  packetCounter++;
+	 }
+	 
 	 //Sends Last control Packet
 	 *packet_1 = '2';
 	 llwrite(stop, al, ll, packet_1, packetSize);
@@ -121,11 +131,12 @@
 	
 	int readFile() {
 	  char * packet_1;
-	  int sizeOfPacket = llread(al, ll, &packet_1);
+	  int sizeOfPacket;
 	  
 	  int cn = FALSE;
 	  while (cn == FALSE) {
-	    
+	    sizeOfPacket = llread(al, ll, &packet_1);
+	    	    
 	    int i = 0;
 	    printf("\n");
 	    while (i < sizeOfPacket) {
@@ -137,12 +148,11 @@
 	    printf("\nSize of packet is: %d\n", sizeOfPacket);
 	    printf("\n");
 	    
-	    free(packet_1);
-	    sizeOfPacket = llread(al, ll, &packet_1);
-	    
-	    if (*packet_1 == 2) {
+	    if (*packet_1 == '2') {
 	      cn = TRUE;
 	    }
+	    
+	    free(packet_1);
 	  }
 	  
 	  return 0;
