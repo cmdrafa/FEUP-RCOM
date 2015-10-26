@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <signal.h>
 
+
 #define BAUDRATE B9600
 #define MODEMDEVICE "/dev/ttyS0"
 #define _POSIX_SOURCE 1 // POSIX compliant source
@@ -57,3 +58,5 @@ typedef struct {
 
   char frame[MAX_SIZE];
 } linkLayer;
+
+int getFileSize(FILE* file);

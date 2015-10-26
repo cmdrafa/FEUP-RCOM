@@ -1,5 +1,6 @@
 	#include "applicationLayer.h"
 
+
 	int * flag;
 	int * count;
 	int * stop;
@@ -35,39 +36,36 @@
 
 		(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
-		ll_open(flag, stop, count, al, ll, &oldtio);
-		
+		if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
+		  perror("llopen");
+		  return -1;
+		}
+		  
 		if ((*al).status == 'W') {
 			printf("\n______________________________Sending control packet 1____________________________________\n");
 			
-			char * packet_1 = createFirstControlPacket();
-			llwrite(stop, al, ll, packet_1, 6);
-			free(packet_1);
+			if (sendFile() < 0) {
+			 perror("sendFile");
+			 return -1;
+			}
 			
 			printf("\n______________________________Sent control packet 1_______________________________________\n");
 		}
 		else if ((*al).status == 'R') {
 			printf("\n______________________________Receiving control packet 1____________________________________\n");
 			
-			char * packet_1;
-			int sizeOfPacket = llread(al, ll, &packet_1);
-			
-			printf("\n\nRECEIVED :-D\n\n");
-			
-			printf("\nSize is: %d\n", sizeOfPacket);
-			int asd = 0;
-			while (asd < sizeOfPacket) {
-			    printf("%c", *(packet_1 + asd));
-			    asd++; 
+			if (readFile() < 0) {
+			  perror("readFile");
+			  return -1;
 			}
-			printf("\n");
-			
-			free(packet_1);
 			
 			printf("\n______________________________Received control packet 1_______________________________________\n");
 		}
 		
-		ll_close(flag, stop, count, al, ll, &oldtio);
+		 if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
+		   perror("llclose");
+		   return -1;
+		 }
 
 		free(count);
 		free(flag);
@@ -88,9 +86,55 @@
 		(*ll).numTransmissions = ATTEMPTS;
 	}
 	
-	char * createFirstControlPacket() {
-		char * control = malloc(sizeof(char) * 6);
-		char con[] = "003Pin";
+	char * createFirstControlPacket(int * packetSize, char ** fileSizeChar) {
+		*packetSize = 24;
+		char * control = malloc(sizeof(char) * (*packetSize));
+		char con[] = "107pinguim.gif18";
 		strcpy(control, con);
+		strncpy(control + 16, *fileSizeChar, 8);
 		return control;
+	}
+	
+	int sendFile() {
+	 int packetSize;
+	 
+	 FILE * pfd = fopen("./pinguim.gif", "r");
+	 
+	 int fileSize = getFileSize(pfd);
+	 char * fileSizeChar = malloc(sizeof(char) * 8);
+	 sprintf(fileSizeChar, "%d", fileSize);
+	 
+	 char * packet_1 = createFirstControlPacket(&packetSize, &fileSizeChar);
+	 free(fileSizeChar);
+	 
+	 //Sends First control packet
+	 llwrite(stop, al, ll, packet_1, packetSize);
+	 
+	 //Sends Last control Packet
+	 *packet_1 = '2';
+	 llwrite(stop, al, ll, packet_1, packetSize);
+	 
+	 free(packet_1); 
+	 fclose(pfd);
+	 return 0;
+	}
+	
+	int readFile() {
+	  char * packet_1;
+	  int sizeOfPacket = llread(al, ll, &packet_1);
+	  
+	  while (*packet_1 != 2) {
+	    
+	    int i = 0;
+	    while (i < sizeOfPacket) {
+	      printf("%c", *(packet_1 + i));
+	    }
+	    
+	    printf("\nSize is: %d\n", sizeOfPacket);
+	
+	    free(packet_1);
+	    sizeOfPacket = llread(al, ll, &packet_1);
+	    
+	    printf("\n");
+	  }
 	}

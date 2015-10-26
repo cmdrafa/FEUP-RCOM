@@ -1,2 +1,2 @@
-all: applicationLayer.c linkLayer.c
-	gcc -o proj applicationLayer.c linkLayer.c
+all: applicationLayer.c linkLayer.c utilities.c
+	gcc -o proj applicationLayer.c linkLayer.c utilities.c
