@@ -40,7 +40,6 @@
 #define TIMEOUT 3
 #define ATTEMPTS 3
 
-#define MAX_SIZE 255
 #define MAX_PACKET_SIZE 100
 
 #define UALENGTH 5
@@ -56,9 +55,6 @@ typedef struct {
   unsigned int sequenceNumber;
   unsigned int timeout;
   unsigned int numTransmissions;
-
-  char frame[MAX_SIZE];
 } linkLayer;
 
 int getFileSize(FILE* file);
-
