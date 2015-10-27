@@ -329,9 +329,11 @@ int readFile() {
 				i++;
 				finalFileToStore++;
 			}
-			packetCounter++;
+			
 			printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
-
+			packetCounter++;
+			ll->stat->receivedMessages++;
+			
 		} else {
 			free(packet_1);
 		}

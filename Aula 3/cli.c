@@ -292,7 +292,8 @@ const int PROGRESS_BAR_LENGTH = 51;
 void printProgressBar(int current, int total) {
   float percentage = 100.0 * current / (float) total;
   
-  
+  if (percentage > 100.0)
+    percentage = 100.0;
   
   printf("\rCompleted: %6.2f%% [", percentage);
   int i;
@@ -305,7 +306,6 @@ void printProgressBar(int current, int total) {
 }
 
 void printStats(applicationLayer * al, Statistics * stats){
-  clearScreen();
   
 	int numReceivedRR;
 	int numReceivedREJ;
