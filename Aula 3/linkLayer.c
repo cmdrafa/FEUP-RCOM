@@ -332,8 +332,16 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	printf("\nC: 0x%x", *(*buffer + 2));
 	printf("\nBcc1: 0x%x", *(*buffer + 3));
 	printf("\nBcc2: 0x%x", *(*buffer + sizeOfInfoRead - 2));
+	
+	int length = sizeOfInfoRead - 6;
+	int q = 4;
+	char bcc2 = 0x0;
+	while (q < (length + 4)) {
+	  bcc2 = bcc2 ^ *(*buffer + q);
+	  q++;
+	}
 
-	if ((*(*buffer + 3) != (*(*buffer + 1) ^ *(*buffer + 2))) || (*(*buffer + sizeOfInfoRead - 2) != (*(*buffer + 1) ^ *(*buffer + 2)))) {
+	if ((*(*buffer + 3) != (*(*buffer + 1) ^ *(*buffer + 2))) || (*(*buffer + sizeOfInfoRead - 2) != bcc2)) {
 		if ((*ll).sequenceNumber == 0) {
 			writeMsg(al, A_1, C_RR_0);
 			printf("\n****\n2nd ERROR receiving 1, wanted 0, sending REJ 0\n****");
@@ -396,7 +404,13 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		j++;
 	}
 
-	*(toSend + length + 4) = *(toSend + 3);
+	*(toSend + length + 4) = 0x0;
+	int q = 4;
+	while (q < (length + 4)) {
+	  *(toSend + length + 4) = *(toSend + length + 4) ^ *(toSend + q);
+	  q++;
+	}
+	
 	*(toSend + length + 5) = FLAG;
 
 	strcpy(toS, toSend);
@@ -415,8 +429,6 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		if(&flagPointer) {
 			alarm(TIMEOUT);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
-			tcflush((*al).fd, TCOFLUSH); // Clean output buffer
-			tcflush((*al).fd, TCIFLUSH);			
 
 			write(al->fd, toSendStuffed, bufSize); //Sending the info
 			//*******************************************
@@ -434,11 +446,9 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 				rr = TRUE;
 			}
 			else if (resp == -2) {
-				(*ll).sequenceNumber = 0;
 				printf("\n-> Received REJ | Receiver asking for packet 0");
 			}
 			else if (resp == -3) {
-				(*ll).sequenceNumber = 1;
 				printf("\n-> Received REJ | Receiver asking for packet 1");
 			} else {
 			  printf("\nTIMEOUT - did not read response");

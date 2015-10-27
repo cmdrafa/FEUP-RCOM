@@ -37,7 +37,7 @@
 
 #define BCC A^C_SET
 #define SETLEN 5
-#define TIMEOUT 10
+#define TIMEOUT 3
 #define ATTEMPTS 3
 
 #define MAX_PACKET_SIZE 350
