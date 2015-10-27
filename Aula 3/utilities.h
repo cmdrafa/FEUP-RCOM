@@ -40,7 +40,7 @@
 #define TIMEOUT 3
 #define ATTEMPTS 3
 
-#define MAX_PACKET_SIZE 500
+#define MAX_PACKET_SIZE 350
 
 #define UALENGTH 5
 

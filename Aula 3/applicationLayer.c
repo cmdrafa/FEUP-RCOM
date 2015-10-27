@@ -176,11 +176,11 @@ int readFile() {
 
 	int cn = FALSE;
 	while (cn == FALSE) {
-		printf("\n__________________________________________________________________\nPacket Received");
+		printf("\n__________________________________________________________________\nPacket Received\n");
 
 		sizeOfPacket = llread(al, ll, &packet_1);
-
-		printf("\nSize of packet is: %d", sizeOfPacket);
+		
+		printf("\nSize of packet is: %d\n", sizeOfPacket);
 
 		if (*packet_1 == '2') {
 			cn = TRUE;

@@ -332,15 +332,16 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 		(*ll).sequenceNumber = 0;
 	} else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_1) {
 		writeMsg(al, A_1, C_REJ_0);
-		printf("\n****************************************************\nERROR receiving 1, wanted 0, sending REJ 0\n****************************************************");
+		printf("\n****\nERROR receiving 1, wanted 0, sending REJ 0\n****");
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_0) {
 		writeMsg(al, A_1, C_REJ_1);
-		printf("\n****************************************************\nERROR receiving 0, wanted 1, sending REJ 1\n****************************************************");
+		printf("\n****\nERROR receiving 0, wanted 1, sending REJ 1\n****");
 	}
 
 	sizeOfInfoRead = removeFrameHeaderAndTrailer(buffer, sizeOfInfoRead);
-
+	
 	free(buffer_2);
+
 	return sizeOfInfoRead;
 }
 
@@ -381,47 +382,44 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	//*********** While cycle to control the sending of the message **************
 	tcflush((*al).fd, TCIFLUSH);
 	int rr = FALSE;
-	while (rr == FALSE) {
-		while(*countPointer < (*ll).numTransmissions && rr == FALSE) {
-			printf("\nSending Packet with seqNum: 0x%x", *(toSendStuffed + 2));
-			if(&flagPointer) {
-				alarm(TIMEOUT);
-				//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
-				tcflush((*al).fd, TCOFLUSH); // Clean output buffer
-				write(al->fd, toSendStuffed, bufSize); //Sending the info
-
+	while(*countPointer < (*ll).numTransmissions && rr == FALSE) {
+		printf("\nSending Packet with seqNum: 0x%x", *(toSendStuffed + 2));
+		if(&flagPointer) {
+			alarm(TIMEOUT);
+			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
+			tcflush((*al).fd, TCOFLUSH); // Clean output buffer
+			write(al->fd, toSendStuffed, bufSize); //Sending the info
 				//*******************************************
-				tcflush((*al).fd, TCIFLUSH);
-				*flagPointer = FALSE;
-
+			tcflush((*al).fd, TCIFLUSH);
+			*flagPointer = FALSE;
 				int resp = readSenderResponse(al, ll);
-				if(resp == 0) {
-					(*ll).sequenceNumber = 0;
-					printf("\n-> Received RR | Receiver asking for packet 0");
-					rr = TRUE;
-				}
-				else if(resp == 1) {
-					(*ll).sequenceNumber = 1;
-					printf("\n-> Received RR | Receiver asking for packet 1");
-					rr = TRUE;
-				}
-				else if (resp == -2) {
-					(*ll).sequenceNumber = 0;
-					printf("\n-> Received REJ | Receiver asking for packet 0");
-				}
-				else if (resp == -3) {
-					(*ll).sequenceNumber = 1;
-					printf("\n-> Received REJ | Receiver asking for packet 1");
-				} else {
-				  printf("\nTIMEOUT expired");
-				}
-				printf("\n");
-				sleep(1);
-				//*******************************************
-			} else {
-				printf("\nTIMEOUT expired");
+			if(resp == 0) {
+				(*ll).sequenceNumber = 0;
+				printf("\n-> Received RR | Receiver asking for packet 0");
+				rr = TRUE;
 			}
+		else if(resp == 1) {
+				(*ll).sequenceNumber = 1;
+				printf("\n-> Received RR | Receiver asking for packet 1");
+				rr = TRUE;
+			}
+			else if (resp == -2) {
+				(*ll).sequenceNumber = 0;
+				printf("\n-> Received REJ | Receiver asking for packet 0");
+			}
+			else if (resp == -3) {
+				(*ll).sequenceNumber = 1;
+				printf("\n-> Received REJ | Receiver asking for packet 1");
+			} else {
+			  printf("\nTIMEOUT expired");
+			}
+			printf("\n");
+			//sleep(1);
+			//*******************************************
+		} else {
+			printf("\nTIMEOUT expired");
 		}
+
 	}
 	free(toSendStuffed);
 	free(toSend);
