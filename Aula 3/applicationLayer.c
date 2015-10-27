@@ -104,10 +104,12 @@ int main(int argc, char** argv) {
 	
 	showInitialInfo(ll, al);
 	
+	printf("\n####  Attempting connection...   ####\n");
 	if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_open\n");
 		return -1;
 	}
+	printf("\n####  Connection established.   ####\n");
 
 	if ((*al).status == 'W') {
 		if ((*al).debug == TRUE) {
@@ -134,11 +136,13 @@ int main(int argc, char** argv) {
 		printf("\n______________________________Received control packet 1_______________________________________\n");
 		}
 	}
-
+	
+	printf("\n\n####  Terminating connection...   ####\n");
 	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_close\n");
 		return -1;
 	}
+	printf("\n####  Connection terminated.   ####\n");
 
 	free(count);
 	free(flag);
@@ -183,6 +187,8 @@ int sendFile() {
 
 	FILE * pfd = fopen("./pinguim.gif", "r");
 	int fileSize = getFileSize(pfd);
+	
+	printf("\n\nSize of file expected: %d\n\n", fileSize);
 
 	char * fullFile = malloc(sizeof(char) * fileSize);
 	char * fullFileStart = fullFile;
@@ -205,6 +211,7 @@ int sendFile() {
 	if ((fileSize % (((*ll).packSize - 6) - 4)) > 0)
 	numberOfPackets++;
 	while (packetCounter < numberOfPackets) {
+	  
 		if ((*al).debug == TRUE) {
 		printf("\n_________________________________________________\nPacket Number: %d", packetCounter);
 		}
@@ -223,6 +230,7 @@ int sendFile() {
 			fullFile++;
 			i++;
 		}
+		
 		if ((*al).debug == TRUE) {
 		printf("\nPacket size is: %d\n", i);
 		}
@@ -233,12 +241,18 @@ int sendFile() {
 		 free(fullFileStart);
 		 fclose(pfd);
 		 free(infoPacket);
+		 
+		 printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
+		 
 		 return -1;
 		}
-
+		
+		printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
+		
 		free(infoPacket);
 		packetCounter++;
 	}
+	printf("\n");
 
 	//Sends Last control Packet
 	*packet_1 = '2';
@@ -259,6 +273,7 @@ int readFile() {
 	char * finalFileToStore;
 	char * fileName;
 	int fileSize;
+	int packetCounter = 0;
 
 	int cn = FALSE;
 	while (cn == FALSE) {
@@ -297,12 +312,15 @@ int readFile() {
 				i++;
 				finalFileToStore++;
 			}
+			packetCounter++;
+			printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
 
 		} else {
 			free(packet_1);
 		}
 	}
-
+	printf("\n");
+	
 	free(fileName);
 	free(finalFile);
 

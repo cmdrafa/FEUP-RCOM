@@ -286,3 +286,20 @@ void flushIn() {
   char ch;
   while ((ch = getchar()) != '\n' && ch != EOF);
 }
+
+const int PROGRESS_BAR_LENGTH = 51;
+
+void printProgressBar(int current, int total) {
+  float percentage = 100.0 * current / (float) total;
+  
+  
+  
+  printf("\rCompleted: %6.2f%% [", percentage);
+  int i;
+  int len = PROGRESS_BAR_LENGTH;
+  int pos = percentage * len / 100.0;
+  for (i = 0; i < len; i++)
+    i <= pos ? printf("=") : printf(" ");
+  printf("]");
+  fflush(stdout);
+}

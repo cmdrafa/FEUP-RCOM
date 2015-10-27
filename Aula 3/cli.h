@@ -16,3 +16,5 @@
   int chooseNumTransmissions();
   
   void showInitialInfo(linkLayer * ll, applicationLayer * al);
+  
+  void printProgressBar(int current, int total);
