@@ -148,6 +148,8 @@ int sendFile() {
 		printf("\nPacket size is: %d\n", i);
 		llwrite(stop, al, ll, infoPacket, i);
 
+		printf("\nExited llwrite\n");
+
 		free(infoPacket);
 		packetCounter++;
 	}
