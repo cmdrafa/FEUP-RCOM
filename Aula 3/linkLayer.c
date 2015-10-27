@@ -373,6 +373,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
 	
 	//Fill the toSend char array
+	char * toS = malloc(sizeof(char) * (length + 6));
 	char * toSend = malloc(sizeof(char) * (length + 6));
 	*toSend = FLAG;
 	*(toSend + 1) = A_1;
@@ -395,6 +396,8 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 
 	*(toSend + length + 4) = *(toSend + 3);
 	*(toSend + length + 5) = FLAG;
+
+	strcpy(toS, toSend);
 
 	//Finished filling the char array
 
@@ -447,6 +450,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 
 	}
 	free(toSendStuffed);
+	free(toS);
 	free(toSend);
 	//****************************************************************************
 }
