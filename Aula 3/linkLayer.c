@@ -341,9 +341,11 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	  q++;
 	}
 
+	printf("\nBcc2-2: 0x%x", bcc2);
+
 	if ((*(*buffer + 3) != (*(*buffer + 1) ^ *(*buffer + 2))) || (*(*buffer + sizeOfInfoRead - 2) != bcc2)) {
 		if ((*ll).sequenceNumber == 0) {
-			writeMsg(al, A_1, C_RR_0);
+
 			printf("\n****\n2nd ERROR receiving 1, wanted 0, sending REJ 0\n****");
 			writeMsg(al, A_1, C_REJ_0);
 			free(buffer_2);
