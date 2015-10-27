@@ -311,7 +311,6 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	char * buffer_2 = malloc(sizeof(char) * ((MAX_PACKET_SIZE * 2) + 16));
 
 	int nRead = -1;
-
 	while (nRead < 0) {
 		nRead = readInfo(al, &flagT, buffer_2);
 	}
@@ -411,6 +410,8 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		if(&flagPointer) {
 			alarm(TIMEOUT);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
+			tcflush((*al).fd, TCOFLUSH); // Clean output buffer
+			tcflush((*al).fd, TCIFLUSH);			
 
 			write(al->fd, toSendStuffed, bufSize); //Sending the info
 			//*******************************************
@@ -438,6 +439,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 			  printf("\nTIMEOUT - did not read response");
 			}
 			printf("\n");
+			//sleep(1);
 			//*******************************************
 		} else {
 			printf("\nTIMEOUT expired");
