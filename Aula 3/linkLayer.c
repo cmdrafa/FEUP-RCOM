@@ -3,8 +3,6 @@
 int * flagPointer;
 int * countPointer;
 
-linkLayer ll;
-
 //*********************** Function to send the message **************************
 void writeMsg(applicationLayer * al, char aFlag, char cFlag) {
 	tcflush((*al).fd, TCOFLUSH); // Clean output buffer
@@ -322,7 +320,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 		nRead = readInfo(al, &flagT, buffer_2);
 	}
 
-	int sizeOfInfoRead = unStuff(buffer_2, buffer);
+	int sizeOfInfoRead = unStuff(buffer_2, buffer, ll);
 
 	if (*(*buffer + 2) == C_0) {
 		printf("\nSequence number received was: 0");
@@ -611,7 +609,8 @@ char * stuff(char ** unStuffed, int unStuffedLength, int * bufSize) {
 	return toRet;
 }
 
-int unStuff(char * unstuffed, char ** stuffed) {
+int unStuff(char * unstuffed, char ** stuffed, linkLayer * ll) {
+        
 	char * temp = malloc(sizeof(char) * ((((*ll).packSize - 6) * 2) + 16));
 
 	int stuffedC = 0;
