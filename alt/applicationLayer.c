@@ -40,7 +40,9 @@ int main(int argc, char** argv) {
 		perror("llopen");
 		return -1;
 	}
-
+	
+	
+	/*
 	if ((*al).status == 'W') {
 		printf("\n______________________________Sending control packet 1____________________________________\n");
 
@@ -61,6 +63,7 @@ int main(int argc, char** argv) {
 
 		printf("\n______________________________Received control packet 1_______________________________________\n");
 	}
+	*/
 
 	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
 		perror("llclose");
