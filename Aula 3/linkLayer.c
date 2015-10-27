@@ -436,7 +436,8 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		if(&flagPointer) {
 			alarm(TIMEOUT);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
-
+		       
+			tcflush((*al).fd, TCOFLUSH);
 			write(al->fd, toSendStuffed, bufSize); //Sending the info
 			//*******************************************
 
