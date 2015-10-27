@@ -206,7 +206,7 @@ void resetConfiguration(applicationLayer * al, struct termios * oldtio) {
 void triggerAlarm() {
 	*flagPointer = TRUE;
 	*countPointer = *countPointer + 1;
-	printf("\nTimeout Expired: %ds", (*ll).timeout);
+	printf("\nTimeout Expired");
 }
 //************************************************
 
