@@ -528,15 +528,17 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 	if(*flagPointer)
 	return -1;
 
-	if (response[2] == C_REJ_0)
+	if (response[2] == C_REJ_0 && (stateMachine == 5))
 	return -2;
-	else if (response[2] == C_REJ_1)
+	else if (response[2] == C_REJ_1 && (stateMachine == 5))
 	return -3;
-	else if (response[2] == C_RR_0) {
+	else if (response[2] == C_RR_0 && (stateMachine == 5)) {
 		return 0;
 	}
-	else if (response[2] == C_RR_1) {
+	else if (response[2] == C_RR_1 && (stateMachine == 5)) {
 		return 1;
+	} else {
+		return -1;
 	}
 }
 
