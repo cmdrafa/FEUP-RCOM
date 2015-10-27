@@ -153,6 +153,7 @@ void fillLinkLayer() {
 	(*ll).timeout = TIMEOUT;
 	(*ll).numTransmissions = ATTEMPTS;
 	(*ll).packSize = MAX_PACKET_SIZE + 6;
+	(*al).debug = FALSE;
 }
 
 char * createFirstControlPacket(int * packetSize, char ** fileSizeChar) {

@@ -47,6 +47,8 @@
 typedef struct {
   int fd;
   char status;
+  
+  int debug;
 } applicationLayer;
 
 typedef struct {
