@@ -107,6 +107,8 @@ int main(int argc, char** argv) {
 		printf("\nError in ll_open\n");
 		return -1;
 	}
+	
+	showInitialInfo();
 
 	if ((*al).status == 'W') {
 		printf("\n______________________________Sending control packet 1____________________________________\n");

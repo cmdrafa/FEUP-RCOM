@@ -1,4 +1,5 @@
-#include <stdio.h>
+//#include <stdio.h>
+#include "utilities.h"
 
   void clearScreen();
 
@@ -13,3 +14,5 @@
   int chooseTimeout();
   
   int chooseNumTransmissions();
+  
+  void showInitialInfo();

@@ -189,6 +189,59 @@ int chooseNumTransmissions() {
   return -1;
 }
 
+void showInitialInfo(linkLayer * ll, applicationLayer * al) {
+  clearScreen();
+
+  char modeW[] = "Transmitter\0";
+  char modeR[] = "Receiver\0";
+  int s = -1;
+  
+  if ((*al).status == 'W') {
+    s = 0;
+  } else {
+    s = 1;
+  }
+  
+  if (s == 0) {
+  
+  printf("\n\n\n"
+    "************************************\n"
+    "********* RCOM project - 1 *********\n"
+    "************************************\n"
+    "                                    \n"
+    "       # Initial Information #      \n"
+    "                                    \n"
+    "                                    \n"
+    "            Mode: %s\n"
+    "       Baud rate: %d\n"
+    "    Msg Max Size: %d\n"
+    "        Attempts: %d\n"
+    "         Timeout: %d\n\n"
+    "************************************\n"
+    "\n\n", modeW, (*ll).baudRate, (*ll).packSize, (*ll).numTransmissions, (*ll).timeout);
+
+  } else {
+      printf("\n\n\n"
+    "************************************\n"
+    "********* RCOM project - 1 *********\n"
+    "************************************\n"
+    "                                    \n"
+    "       # Initial Information #      \n"
+    "                                    \n"
+    "                                    \n"
+    "            Mode: %s\n"
+    "       Baud rate: %d\n"
+    "    Msg Max Size: %d\n"
+    "        Attempts: %d\n"
+    "         Timeout: %d\n\n"
+    "************************************\n"
+    "\n\n", modeR, (*ll).baudRate, (*ll).packSize, (*ll).numTransmissions, (*ll).timeout);
+
+  }
+
+  return;
+}
+
 void flushIn() {
   char ch;
   while ((ch = getchar()) != '\n' && ch != EOF);
