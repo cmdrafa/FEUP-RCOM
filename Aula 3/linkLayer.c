@@ -220,9 +220,9 @@ void triggerAlarm() {
 	*flagPointer = TRUE;
 	*countPointer = *countPointer + 1;
 	
-	/*if ((*al).debug == TRUE) {
-	  printf("\nTimeout Expired");
-	}*/
+	
+	  //printf("\nTimeout Expired");
+	
 }
 //************************************************
 

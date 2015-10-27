@@ -109,24 +109,29 @@ int main(int argc, char** argv) {
 	}
 
 	if ((*al).status == 'W') {
+		if ((*al).debug == TRUE) {
 		printf("\n______________________________Sending control packet 1____________________________________\n");
-
+		}
 		if (sendFile() < 0) {
 			printf("\nError in sendFile\n");
 			return -1;
 		}
-
+		if ((*al).debug == TRUE) {
 		printf("\n______________________________Sent control packet 1_______________________________________\n");
+		}
 	}
 	else if ((*al).status == 'R') {
+		if ((*al).debug == TRUE) {
 		printf("\n______________________________Receiving control packet 1____________________________________\n");
+		}
 
 		if (readFile() < 0) {
 			printf("\nError in readFile\n");
 			return -1;
 		}
-
+		if ((*al).debug == TRUE) {
 		printf("\n______________________________Received control packet 1_______________________________________\n");
+		}
 	}
 
 	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
@@ -141,7 +146,7 @@ int main(int argc, char** argv) {
 	free(al);
 	free(ll);
 
-	printf("\nTerminated!\n");
+	//printf("\nTerminated!\n");
 
 	return 0;
 }
@@ -186,9 +191,12 @@ int sendFile() {
 
 	char * packet_1 = createFirstControlPacket(&packetSize, &fileSizeChar);
 	free(fileSizeChar);
+	
 
 	//Sends First control packet
+	if ((*al).debug == TRUE) {
 	printf("\n_________________________________________________\nFirst Control Packet");
+	}
 	llwrite(stop, al, ll, packet_1, packetSize);
 
 	int packetCounter = 0;
@@ -196,7 +204,9 @@ int sendFile() {
 	if ((fileSize % (((*ll).packSize - 6) - 4)) > 0)
 	numberOfPackets++;
 	while (packetCounter < numberOfPackets) {
+		if ((*al).debug == TRUE) {
 		printf("\n_________________________________________________\nPacket Number: %d", packetCounter);
+		}
 		char * infoPacket = malloc(sizeof(char) * ((*ll).packSize - 6));
 		*infoPacket = '0';
 		*(infoPacket + 1) = (char) packetCounter;
@@ -212,8 +222,9 @@ int sendFile() {
 			fullFile++;
 			i++;
 		}
-
+		if ((*al).debug == TRUE) {
 		printf("\nPacket size is: %d\n", i);
+		}
 		if (llwrite(stop, al, ll, infoPacket, i) < 0)
 		{
 		 printf("\nError in llwrite\n");
@@ -230,7 +241,9 @@ int sendFile() {
 
 	//Sends Last control Packet
 	*packet_1 = '2';
+	if ((*al).debug == TRUE) {
 	printf("\n_________________________________________________\nLast Control Packet");
+	}
 	llwrite(stop, al, ll, packet_1, packetSize);
 
 	free(packet_1);
@@ -250,16 +263,17 @@ int readFile() {
 	while (cn == FALSE) {
 		char * packet_1;
 		int sizeOfPacket = -1;
-
+		if ((*al).debug == TRUE) {
 		printf("\n__________________________________________________________________\nPacket Received\n");
-
+		}
 		while (sizeOfPacket < 0) {
 			sizeOfPacket = llread(al, ll, &packet_1);
 			if (sizeOfPacket < 0)
 				free(packet_1);
 		}
-
+		if ((*al).debug == TRUE) {
 		printf("\nSize of packet is: %d\n", sizeOfPacket);
+		}
 
 		if (sizeOfPacket < 0) {
 			free(packet_1);
