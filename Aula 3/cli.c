@@ -1,5 +1,7 @@
 #include "cli.h"
 
+int bRate;
+
 void clearScreen() {
 	printf("\033[2J");
 }
@@ -94,7 +96,45 @@ int chooseBaudrate() {
     flushIn();
 
     if (choice >= 1 && choice <= 11) {
-    return choice;
+      switch(choice) {
+	  case 1:
+	    bRate = 300;
+	    break;
+	  case 2:
+	    bRate = 600;
+	    break;
+	  case 3:
+	     bRate = 1200;
+	    break;
+	  case 4:
+	     bRate = 1800;
+	    break;
+	  case 5:
+	     bRate = 2400;
+	    break;
+	  case 6:
+	     bRate = 4800;
+	    break;
+	  case 7:
+	     bRate = 9600;
+	    break;
+	  case 8:
+	     bRate = 19200;
+	    break;
+	  case 9:
+	     bRate = 38400;
+	    break;
+	  case 10:
+	     bRate = 57600;
+	    break;
+	  case 11:
+	     bRate = 115200;
+	    break;
+	  default:
+	    printf("\nError in choice of baudrate\n");
+	    return -1;
+	}
+      return choice;
   }
 
   return -1;
@@ -202,8 +242,6 @@ void showInitialInfo(linkLayer * ll, applicationLayer * al) {
     s = 1;
   }
   
-  printf("\nasd\n");
-  
   if (s == 0) {
   
   printf("\n\n\n"
@@ -215,12 +253,12 @@ void showInitialInfo(linkLayer * ll, applicationLayer * al) {
     "                                    \n"
     "                                    \n"
     "            Mode: %s\n"
-    "       Baud rate: %d\n"
+    "       Baud rate: B%d\n"
     "    Msg Max Size: %d\n"
     "        Attempts: %d\n"
     "         Timeout: %d\n\n"
     "************************************\n"
-    "\n\n", modeW, (*ll).baudRate, (*ll).packSize, (*ll).numTransmissions, (*ll).timeout);
+    "\n\n", modeW, bRate, (*ll).packSize, (*ll).numTransmissions, (*ll).timeout);
 
   } else {
       printf("\n\n\n"
@@ -232,12 +270,12 @@ void showInitialInfo(linkLayer * ll, applicationLayer * al) {
     "                                    \n"
     "                                    \n"
     "            Mode: %s\n"
-    "       Baud rate: %d\n"
+    "       Baud rate: B%d\n"
     "    Msg Max Size: %d\n"
     "        Attempts: %d\n"
     "         Timeout: %d\n\n"
     "************************************\n"
-    "\n\n", modeR, (*ll).baudRate, (*ll).packSize, (*ll).numTransmissions, (*ll).timeout);
+    "\n\n", modeR, bRate, (*ll).packSize, (*ll).numTransmissions, (*ll).timeout);
 
   }
 

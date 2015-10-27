@@ -102,12 +102,12 @@ int main(int argc, char** argv) {
 
 	(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 	
+	showInitialInfo(ll, al);
+	
 	if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_open\n");
 		return -1;
 	}
-	
-	showInitialInfo();
 
 	if ((*al).status == 'W') {
 		if ((*al).debug == TRUE) {
