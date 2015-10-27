@@ -148,6 +148,37 @@ int chooseTimeout() {
     int choice = -1;
 
     scanf("%d", &choice);
+    
+    if (choice == 0) choice = 3;
+    
+    flushIn();
+
+    if (choice >= 1 && choice <= 60) {
+    return choice;
+  }
+
+  return -1;
+}
+
+int chooseNumTransmissions() {
+  clearScreen();
+
+  printf("\n\n\n"
+    "********************************************************\n"
+    "******************* RCOM project - 1 *******************\n"
+    "********************************************************\n"
+    "**                                                    **\n"
+    "**            Choose the number of attempts:          **\n"
+    "**                                                    **\n"
+    "**                      [1 - 60]                      **\n"
+    "**                                                    **\n"
+    "**                                                    **\n"
+    "********************************************************\n"
+    "\n\n");
+
+    int choice = -1;
+
+    scanf("%d", &choice);
 
     flushIn();
 

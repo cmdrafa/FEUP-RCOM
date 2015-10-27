@@ -87,6 +87,9 @@ int main(int argc, char** argv) {
 	while (firstChoice < 0) { firstChoice = chooseTimeout(); }
 	(*ll).timeout = firstChoice;
 	
+	firstChoice = -1;
+	while (firstChoice < 0) { firstChoice = chooseNumTransmissions(); }
+	(*ll).numTransmissions = firstChoice;
 	
 	count = malloc(sizeof(int));
 	flag = malloc(sizeof(int));

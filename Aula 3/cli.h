@@ -11,3 +11,5 @@
   int chooseMaxSize();
   
   int chooseTimeout();
+  
+  int chooseNumTransmissions();
