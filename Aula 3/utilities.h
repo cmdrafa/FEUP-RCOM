@@ -55,6 +55,7 @@ typedef struct {
   unsigned int sequenceNumber;
   unsigned int timeout;
   unsigned int numTransmissions;
+  int packSize;
 } linkLayer;
 
 int getFileSize(FILE* file);

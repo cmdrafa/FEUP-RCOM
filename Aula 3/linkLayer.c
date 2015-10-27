@@ -474,8 +474,12 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		}
 
 	}
-	if (*countPointer == (*ll).numTransmissions)
-			return -1;
+	if (*countPointer == (*ll).numTransmissions) {
+	  free(toSendStuffed);
+	  free(toS);
+	  free(toSend);
+	  return -1;
+	}
 	free(toSendStuffed);
 	free(toS);
 	free(toSend);

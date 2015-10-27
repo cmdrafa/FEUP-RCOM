@@ -100,6 +100,34 @@ int chooseBaudrate() {
   return -1;
 }
 
+int chooseMaxSize() {
+  clearScreen();
+
+  printf("\n\n\n"
+    "********************************************************\n"
+    "******************* RCOM project - 1 *******************\n"
+    "********************************************************\n"
+    "**                                                    **\n"
+    "**      Choose the Maximum size of bytes/packet:      **\n"
+    "**                                                    **\n"
+    "**                     [1 - 2000]                     **\n"
+    "**                                                    **\n"
+    "********************************************************\n"
+    "\n\n");
+
+    int choice = -1;
+
+    scanf("%d", &choice);
+
+    flushIn();
+
+    if (choice >= 1 && choice <= 2000) {
+    return choice;
+  }
+
+  return -1;
+}
+
 void flushIn() {
   char ch;
   while ((ch = getchar()) != '\n' && ch != EOF);

@@ -1,9 +1,11 @@
 #include <stdio.h>
 
-	void clearScreen();
+  void clearScreen();
 
   int initialMenu();
 
-	void flushIn();
+  void flushIn();
 	
   int chooseBaudrate();
+  
+  int chooseMaxSize();

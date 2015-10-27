@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
 
 
 
-	al = malloc(sizeof(applicationLayer));
-	ll = malloc(sizeof(linkLayer));
+	al = (applicationLayer *) malloc(sizeof(applicationLayer));
+	ll = (linkLayer *) malloc(sizeof(linkLayer));
 	fillLinkLayer();
 
 	int firstChoice = -1;
@@ -78,6 +78,10 @@ int main(int argc, char** argv) {
 	    printf("\nError in choice of baudrate\n");
 	    return -1;
 	}
+	
+	firstChoice = -1;
+	while (firstChoice < 0) { firstChoice = chooseMaxSize(); }
+	(*ll).packSize = firstChoice + 10;
 	
 	count = malloc(sizeof(int));
 	flag = malloc(sizeof(int));
@@ -140,6 +144,7 @@ void fillLinkLayer() {
 	(*ll).sequenceNumber = 0;
 	(*ll).timeout = TIMEOUT;
 	(*ll).numTransmissions = ATTEMPTS;
+	(*ll).packSize = MAX_PACKET_SIZE + 6;
 }
 
 char * createFirstControlPacket(int * packetSize, char ** fileSizeChar) {
@@ -178,22 +183,22 @@ int sendFile() {
 	llwrite(stop, al, ll, packet_1, packetSize);
 
 	int packetCounter = 0;
-	int numberOfPackets = fileSize / (MAX_PACKET_SIZE - 4);
-	if ((fileSize % (MAX_PACKET_SIZE - 4)) > 0)
+	int numberOfPackets = fileSize / (((*ll).packSize - 6) - 4);
+	if ((fileSize % (((*ll).packSize - 6) - 4)) > 0)
 	numberOfPackets++;
 	while (packetCounter < numberOfPackets) {
 		printf("\n_________________________________________________\nPacket Number: %d", packetCounter);
-		char * infoPacket = malloc(sizeof(char) * MAX_PACKET_SIZE);
+		char * infoPacket = malloc(sizeof(char) * ((*ll).packSize - 6));
 		*infoPacket = '0';
 		*(infoPacket + 1) = (char) packetCounter;
-		char k = (char) (MAX_PACKET_SIZE - 4);
+		char k = (char) (((*ll).packSize - 6) - 4);
 		uint8_t l1 = ((k & 0xFF00) >> 8);
 		*(infoPacket + 2) = l1;
 		uint8_t l2 = (k & 0x00FF);
 		*(infoPacket + 3) = l2;
 
 		int i = 4;
-		while (i < MAX_PACKET_SIZE && ((packetCounter*(MAX_PACKET_SIZE-4) + (i-4)) < fileSize)) {
+		while (i < ((*ll).packSize - 6) && ((packetCounter*(((*ll).packSize - 6)-4) + (i-4)) < fileSize)) {
 			*(infoPacket + i) = *fullFile;
 			fullFile++;
 			i++;
