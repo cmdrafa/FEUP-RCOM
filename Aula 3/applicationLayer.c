@@ -100,9 +100,8 @@ int main(int argc, char** argv) {
 
 	struct termios oldtio;
 
-
 	(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
-
+	
 	if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_open\n");
 		return -1;

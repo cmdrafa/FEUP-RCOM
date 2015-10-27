@@ -15,4 +15,4 @@
   
   int chooseNumTransmissions();
   
-  void showInitialInfo();
+  void showInitialInfo(linkLayer * ll, applicationLayer * al);

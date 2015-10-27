@@ -202,6 +202,8 @@ void showInitialInfo(linkLayer * ll, applicationLayer * al) {
     s = 1;
   }
   
+  printf("\nasd\n");
+  
   if (s == 0) {
   
   printf("\n\n\n"
