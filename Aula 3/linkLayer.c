@@ -206,7 +206,7 @@ void resetConfiguration(applicationLayer * al, struct termios * oldtio) {
 void triggerAlarm() {
 	*flagPointer = TRUE;
 	*countPointer = *countPointer + 1;
-	printf("\nTimeout Expired: %ds", TIMEOUT);
+	printf("\nTimeout Expired: %ds", (*ll).timeout);
 }
 //************************************************
 
@@ -227,7 +227,7 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 		while(*count < (*ll).numTransmissions) {
 
 			if(&flag) {
-				alarm(TIMEOUT);
+				alarm((*ll).timeout);
 
 				//printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
 
@@ -276,7 +276,7 @@ int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLay
 		while(*count < (*ll).numTransmissions) {
 
 			if(&flag) {
-				alarm(TIMEOUT);
+				alarm((*ll).timeout);
 
 				//printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
 				writeMsg(al, A_1, C_DISC);
@@ -437,7 +437,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	while(*countPointer < (*ll).numTransmissions && rr == FALSE) {
 		printf("\nSending Packet with seqNum: 0x%x", *(toSendStuffed + 2));
 		if(&flagPointer) {
-			alarm(TIMEOUT);
+			alarm((*ll).timeout);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
 
 			tcflush((*al).fd, TCOFLUSH);
