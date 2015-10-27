@@ -410,11 +410,16 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	  *(toSend + length + 4) = *(toSend + length + 4) ^ *(toSend + q);
 	  q++;
 	}
-	
+		
 	*(toSend + length + 5) = FLAG;
 
 	strcpy(toS, toSend);
 
+	printf("\nA: 0x%x", *(toSend + 1));
+	printf("\nC: 0x%x", *(toSend + 2));
+	printf("\nBcc1: 0x%x", *(toSend + 3));
+	printf("\nBcc2: 0x%x", *(toSend + length - 4));
+	
 	//Finished filling the char array
 
 	int bufSize = 0;
@@ -454,7 +459,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 			  printf("\nTIMEOUT - did not read response");
 			}
 			printf("\n");
-			sleep(1);
+			usleep(0.5 * 1000000);
 			//*******************************************
 		} else {
 			printf("\nTIMEOUT expired");
