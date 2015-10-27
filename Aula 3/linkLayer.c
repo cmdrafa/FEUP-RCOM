@@ -2,6 +2,7 @@
 
 int * flagPointer;
 int * countPointer;
+int * timeoutAlarm;
 
 //*********************** Function to send the message **************************
 void writeMsg(applicationLayer * al, char aFlag, char cFlag) {
@@ -219,7 +220,7 @@ void resetConfiguration(applicationLayer * al, struct termios * oldtio) {
 void triggerAlarm() {
 	*flagPointer = TRUE;
 	*countPointer = *countPointer + 1;
-	
+	*timeoutAlarm = *timeoutAlarm + 1;
 	
 	  //printf("\nTimeout Expired");
 	
@@ -236,6 +237,7 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 
 	flagPointer = flag;
 	countPointer = count;
+	timeoutAlarm = &(ll->stat->timeouts);
 
 	//*********** While cycle to control the sending of the message **************
 	if ((*al).status == 'W') {
@@ -402,6 +404,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 			if ((*al).debug == TRUE) {
 			  printf("\n****\n2nd ERROR receiving 1, wanted 0, sending REJ 0\n****");
 			}
+			ll->stat->numSentREJ++;
 			writeMsg(al, A_1, C_REJ_0);
 			free(buffer_2);
 			return -5;
@@ -409,6 +412,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 			if ((*al).debug == TRUE) {
 			  printf("\n****\n2nd ERROR receiving 0, wanted 1, sending REJ 1\n****");
 			}
+			ll->stat->numSentREJ++;
 			writeMsg(al, A_1, C_REJ_1);
 			free(buffer_2);
 			return -4;
@@ -416,15 +420,18 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	}
 	else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_0) {
 		writeMsg(al, A_1, C_RR_1);
+		ll->stat->numSentRR++;
 		(*ll).sequenceNumber = 1;
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_1) {
 		writeMsg(al, A_1, C_RR_0);
+		ll->stat->numSentRR++;
 		(*ll).sequenceNumber = 0;
 	} else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_1) {
 		writeMsg(al, A_1, C_REJ_0);
 		if ((*al).debug == TRUE) {
 		  printf("\n****\nERROR receiving 1, wanted 0, sending REJ 0\n****");
 		}
+		ll->stat->numSentREJ++;
 		free(buffer_2);
 		return -2;
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_0) {
@@ -432,6 +439,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 		if ((*al).debug == TRUE) {
 		  printf("\n****\nERROR receiving 0, wanted 1, sending REJ 1\n****");
 		}
+		ll->stat->numSentREJ++;
 		free(buffer_2);
 		return -3;
 	}
@@ -510,6 +518,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 				if ((*al).debug == TRUE) {
 				  printf("\n-> Received RR | Receiver asking for packet 0");
 				}
+				ll->stat->numReceivedRR++;
 				rr = TRUE;
 			}
 			else if(resp == 1) {
@@ -517,17 +526,20 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 				if ((*al).debug == TRUE) {
 				  printf("\n-> Received RR | Receiver asking for packet 1");
 				}
+				ll->stat->numReceivedRR++;
 				rr = TRUE;
 			}
 			else if (resp == -2) {
 				if ((*al).debug == TRUE) {
 				  printf("\n-> Received REJ | Receiver asking for packet 0");
 				}
+				ll->stat->numReceivedREJ++;
 			}
 			else if (resp == -3) {
 				if ((*al).debug == TRUE) {
 				  printf("\n-> Received REJ | Receiver asking for packet 1");
 				}
+				ll->stat->numReceivedREJ++;
 			} else {
 			  if ((*al).debug == TRUE) {
 			    printf("\nTIMEOUT - did not read response");
