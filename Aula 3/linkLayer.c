@@ -312,6 +312,9 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	char * buffer_2 = malloc(sizeof(char) * ((MAX_PACKET_SIZE * 2) + 16));
 
 	int nRead = -1;
+
+	tcflush((*al).fd, TCIFLUSH);			
+
 	while (nRead < 0) {
 		nRead = readInfo(al, &flagT, buffer_2);
 	}
@@ -332,8 +335,11 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	printf("\nBcc1: 0x%x", *(*buffer + 3));
 	printf("\nBcc2: 0x%x", *(*buffer + sizeOfInfoRead - 2));
 
+	tcflush((*al).fd, TCOFLUSH);			
+
 	if ((*(*buffer + 3) != (*(*buffer + 1) ^ *(*buffer + 2))) || (*(*buffer + sizeOfInfoRead - 2) != (*(*buffer + 1) ^ *(*buffer + 2)))) {
 		if ((*ll).sequenceNumber == 0) {
+			writeMsg(al, A_1, C_RR_0);
 			printf("\n****\n2nd ERROR receiving 1, wanted 0, sending REJ 0\n****");
 			writeMsg(al, A_1, C_REJ_0);
 			free(buffer_2);
@@ -406,16 +412,16 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	//*********** While cycle to control the sending of the message **************
 	int rr = FALSE;
 	while(*countPointer < (*ll).numTransmissions && rr == FALSE) {
-		tcflush((*al).fd, TCIFLUSH);
 		printf("\nSending Packet with seqNum: 0x%x", *(toSendStuffed + 2));
 		if(&flagPointer) {
 			alarm(TIMEOUT);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
 			tcflush((*al).fd, TCOFLUSH); // Clean output buffer
-			tcflush((*al).fd, TCIFLUSH);			
 
 			write(al->fd, toSendStuffed, bufSize); //Sending the info
 			//*******************************************
+
+			tcflush((*al).fd, TCIFLUSH);			
 
 			*flagPointer = FALSE;
 			int resp = readSenderResponse(al, ll);
@@ -465,7 +471,6 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 		res = read((*al).fd,&readChar,1); // returns after 1 char input
 
 		if (!*flagPointer && (res == 1)) {
-			printf("\nIT IS HERE\n");
 			switch (stateMachine) {
 				case 0:
 				if (readChar == FLAG) {
