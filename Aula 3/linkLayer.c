@@ -119,6 +119,7 @@ int readInfo(applicationLayer * al, int * flag, char * buffer) {
 		res = read((*al).fd,&readChar,1); // returns after 1 char input
 
 		if (!*flag && (res == 1)) {
+
 			*bufferP = readChar;
 
 			if (c > 3) {
@@ -135,7 +136,7 @@ int readInfo(applicationLayer * al, int * flag, char * buffer) {
 	//***************************************************************************************
 
 	if(*flag)
-	return -1;
+		return -1;
 
 	return c;
 }
@@ -321,10 +322,29 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	}
 	else if (*(*buffer + 2) == C_1) {
 		printf("\nSequence number received was: 1");
-	}
-	printf(" | Sequence number asked was: %d", (*ll).sequenceNumber);
+	}	
 
-	if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_0) {
+	printf(" | Sequence number asked was: %d", (*ll).sequenceNumber);
+	
+	printf("\nA: 0x%x", *(*buffer + 1));
+	printf("\nC: 0x%x", *(*buffer + 2));
+	printf("\nBcc1: 0x%x", *(*buffer + 3));
+	printf("\nBcc2: 0x%x", *(*buffer + sizeOfInfoRead - 2));
+
+	if ((*(*buffer + 3) != (*(*buffer + 1) ^ *(*buffer + 2))) || (*(*buffer + sizeOfInfoRead - 2) != (*(*buffer + 1) ^ *(*buffer + 2)))) {
+		if ((*ll).sequenceNumber == 0) {
+			printf("\n****\n2nd ERROR receiving 1, wanted 0, sending REJ 0\n****");
+			writeMsg(al, A_1, C_REJ_0);
+			free(buffer_2);
+			return -5;
+		} else if ((*ll).sequenceNumber == 1) {
+			printf("\n****\n2nd ERROR receiving 0, wanted 1, sending REJ 1\n****");
+			writeMsg(al, A_1, C_REJ_1);
+			free(buffer_2);
+			return -4;
+		}
+	}
+	else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_0) {
 		writeMsg(al, A_1, C_RR_1);
 		(*ll).sequenceNumber = 1;
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_1) {
@@ -333,14 +353,18 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	} else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_1) {
 		writeMsg(al, A_1, C_REJ_0);
 		printf("\n****\nERROR receiving 1, wanted 0, sending REJ 0\n****");
+		free(buffer_2);
+		return -2;
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_0) {
 		writeMsg(al, A_1, C_REJ_1);
 		printf("\n****\nERROR receiving 0, wanted 1, sending REJ 1\n****");
+		free(buffer_2);
+		return -3;
 	}
-
-	sizeOfInfoRead = removeFrameHeaderAndTrailer(buffer, sizeOfInfoRead);
 	
 	free(buffer_2);
+
+	sizeOfInfoRead = removeFrameHeaderAndTrailer(buffer, sizeOfInfoRead);
 
 	return sizeOfInfoRead;
 }
@@ -380,9 +404,9 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 
 	*countPointer = 0;
 	//*********** While cycle to control the sending of the message **************
-	tcflush((*al).fd, TCIFLUSH);
 	int rr = FALSE;
 	while(*countPointer < (*ll).numTransmissions && rr == FALSE) {
+		tcflush((*al).fd, TCIFLUSH);
 		printf("\nSending Packet with seqNum: 0x%x", *(toSendStuffed + 2));
 		if(&flagPointer) {
 			alarm(TIMEOUT);
@@ -392,13 +416,13 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 				//*******************************************
 			tcflush((*al).fd, TCIFLUSH);
 			*flagPointer = FALSE;
-				int resp = readSenderResponse(al, ll);
+			int resp = readSenderResponse(al, ll);
 			if(resp == 0) {
 				(*ll).sequenceNumber = 0;
 				printf("\n-> Received RR | Receiver asking for packet 0");
 				rr = TRUE;
 			}
-		else if(resp == 1) {
+			else if(resp == 1) {
 				(*ll).sequenceNumber = 1;
 				printf("\n-> Received RR | Receiver asking for packet 1");
 				rr = TRUE;
@@ -485,7 +509,7 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 				switch(readChar) {
 					case FLAG:
 					response[stateMachine] = readChar;
-					//printf("\nCorrect response read: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x.", response[0], response[1], response[2], response[3], response[4]);
+					printf("\nCorrect response read: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x.", response[0], response[1], response[2], response[3], response[4]);
 					stateMachine = 5;
 					break;
 					default:

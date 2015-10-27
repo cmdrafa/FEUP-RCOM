@@ -166,8 +166,6 @@ int sendFile() {
 }
 
 int readFile() {
-	char * packet_1;
-	int sizeOfPacket;
 
 	char * finalFile;
 	char * finalFileToStore;
@@ -176,13 +174,19 @@ int readFile() {
 
 	int cn = FALSE;
 	while (cn == FALSE) {
+		char * packet_1;
+		int sizeOfPacket;
+
 		printf("\n__________________________________________________________________\nPacket Received\n");
 
 		sizeOfPacket = llread(al, ll, &packet_1);
 		
 		printf("\nSize of packet is: %d\n", sizeOfPacket);
-
-		if (*packet_1 == '2') {
+		
+		if (sizeOfPacket < 0) {
+			free(packet_1);
+			continue;
+		} else if (*packet_1 == '2') {
 			cn = TRUE;
 			//FILE * pfd = fopen("./ola/ola2.txt", "w");
 			FILE * pfd = fopen("./received/pinguimR.gif", "w");
@@ -193,7 +197,7 @@ int readFile() {
 			getNameAndSizeOfFile(&packet_1, sizeOfPacket, &fileSize, &fileName);
 			finalFile = malloc(sizeof(char) * fileSize);
 			finalFileToStore = finalFile;
-		} else {
+		} else if (*packet_1 == '0') {
 			int i = 4;
 			while (i < sizeOfPacket) {
 				*finalFileToStore = *(packet_1 + i);
@@ -201,9 +205,9 @@ int readFile() {
 				finalFileToStore++;
 			}
 
+		} else {
+			free(packet_1);
 		}
-
-		free(packet_1);
 	}
 
 	free(fileName);
