@@ -106,7 +106,6 @@ int sendFile() {
 	int packetSize;
 
 	FILE * pfd = fopen("./pinguim.gif", "r");
-	//FILE * pfd = fopen("./ola.txt", "r");
 	int fileSize = getFileSize(pfd);
 
 	char * fullFile = malloc(sizeof(char) * fileSize);
@@ -121,6 +120,8 @@ int sendFile() {
 	//Sends First control packet
 	printf("\n_________________________________________________\nFirst Control Packet");
 	llwrite(stop, al, ll, packet_1, packetSize);
+
+	free(packet_1);
 
 	int sentBytes = 0;
 	int packetCounter = 0;

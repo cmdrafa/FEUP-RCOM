@@ -113,6 +113,7 @@ int readInfo(applicationLayer * al, int * flag, char * buffer) {
 	char * bufferP = buffer;
 	int c = 0;
 
+	tcflush((*al).fd, TCIFLUSH);
 	//************* While that controls the reading of the response of the receiver *********
 	while (end == FALSE) { // state machine control
 		char readChar;
@@ -509,7 +510,6 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 				switch(readChar) {
 					case FLAG:
 					response[stateMachine] = readChar;
-					printf("\nCorrect response read: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x.", response[0], response[1], response[2], response[3], response[4]);
 					stateMachine = 5;
 					break;
 					default:
