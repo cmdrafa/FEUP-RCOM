@@ -121,9 +121,6 @@ int sendFile() {
 	printf("\n_________________________________________________\nFirst Control Packet");
 	llwrite(stop, al, ll, packet_1, packetSize);
 
-	free(packet_1);
-
-	int sentBytes = 0;
 	int packetCounter = 0;
 	int numberOfPackets = fileSize / (MAX_PACKET_SIZE - 4);
 	if ((fileSize % (MAX_PACKET_SIZE - 4)) > 0)
@@ -176,11 +173,13 @@ int readFile() {
 	int cn = FALSE;
 	while (cn == FALSE) {
 		char * packet_1;
-		int sizeOfPacket;
+		int sizeOfPacket = -1;
 
 		printf("\n__________________________________________________________________\nPacket Received\n");
 
-		sizeOfPacket = llread(al, ll, &packet_1);
+		while (sizeOfPacket < 0) {
+			sizeOfPacket = llread(al, ll, &packet_1);
+		}
 		
 		printf("\nSize of packet is: %d\n", sizeOfPacket);
 		

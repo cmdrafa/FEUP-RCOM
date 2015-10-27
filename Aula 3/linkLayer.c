@@ -371,7 +371,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 }
 
 int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
-
+	
 	//Fill the toSend char array
 	char * toSend = malloc(sizeof(char) * (length + 6));
 	*toSend = FLAG;
@@ -387,7 +387,6 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	*(toSend + 3) = *(toSend + 1) ^ *(toSend + 2);
 
 	unsigned int j = 0;
-
 	while (j < length) {
 		*(toSend + j + 4) = *buffer;
 		buffer++;
@@ -413,9 +412,11 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 			alarm(TIMEOUT);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
 			tcflush((*al).fd, TCOFLUSH); // Clean output buffer
+			tcflush((*al).fd, TCIFLUSH);			
+
 			write(al->fd, toSendStuffed, bufSize); //Sending the info
-				//*******************************************
-			tcflush((*al).fd, TCIFLUSH);
+			//*******************************************
+
 			*flagPointer = FALSE;
 			int resp = readSenderResponse(al, ll);
 			if(resp == 0) {
@@ -436,7 +437,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 				(*ll).sequenceNumber = 1;
 				printf("\n-> Received REJ | Receiver asking for packet 1");
 			} else {
-			  printf("\nTIMEOUT expired");
+			  printf("\nTIMEOUT - did not read response");
 			}
 			printf("\n");
 			//sleep(1);
@@ -464,6 +465,7 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 		res = read((*al).fd,&readChar,1); // returns after 1 char input
 
 		if (!*flagPointer && (res == 1)) {
+			printf("\nIT IS HERE\n");
 			switch (stateMachine) {
 				case 0:
 				if (readChar == FLAG) {
