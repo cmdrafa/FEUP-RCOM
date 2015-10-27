@@ -5,3 +5,5 @@
   int initialMenu();
 
 	void flushIn();
+	
+  int chooseBaudrate();

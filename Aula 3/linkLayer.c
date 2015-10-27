@@ -275,7 +275,7 @@ int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLay
 		printf("\nWill send DISC...");
 
 		tcflush((*al).fd, TCIFLUSH);
-		while(*count < ATTEMPTS) {
+		while(*count < (*ll).numTransmissions) {
 
 			if(&flag) {
 				alarm(TIMEOUT);
@@ -291,6 +291,8 @@ int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLay
 				}
 			}
 		}
+		if (*count == (*ll).numTransmissions)
+			return -1;
 
 		printf("\nSending last message (C_UA)");
 		writeMsg(al, A_2, C_UA);
@@ -472,6 +474,8 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		}
 
 	}
+	if (*countPointer == (*ll).numTransmissions)
+			return -1;
 	free(toSendStuffed);
 	free(toS);
 	free(toSend);

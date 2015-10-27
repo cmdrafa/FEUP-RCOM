@@ -37,7 +37,48 @@ int main(int argc, char** argv) {
 	if (firstChoice == 1) { port[9] = '0'; }
 	else { port[9] = '4'; }
 	strncpy((*ll).port, port, 11);
-
+    
+	firstChoice = -1;
+	while (firstChoice == -1) { firstChoice = chooseBaudrate(); }
+	switch(firstChoice) {
+	  case 1:
+	    (*ll).baudRate = B300;
+	    break;
+	  case 2:
+	    (*ll).baudRate = B600;
+	    break;
+	  case 3:
+	     (*ll).baudRate = B1200;
+	    break;
+	  case 4:
+	     (*ll).baudRate = B1800;
+	    break;
+	  case 5:
+	     (*ll).baudRate = B2400;
+	    break;
+	  case 6:
+	     (*ll).baudRate = B4800;
+	    break;
+	  case 7:
+	     (*ll).baudRate = B9600;
+	    break;
+	  case 8:
+	     (*ll).baudRate = B19200;
+	    break;
+	  case 9:
+	     (*ll).baudRate = B38400;
+	    break;
+	  case 10:
+	     (*ll).baudRate = B57600;
+	    break;
+	  case 11:
+	     (*ll).baudRate = B115200;
+	    break;
+	  default:
+	    printf("\nError in choice of baudrate\n");
+	    return -1;
+	}
+	
 	count = malloc(sizeof(int));
 	flag = malloc(sizeof(int));
 	stop = malloc(sizeof(int));
@@ -51,7 +92,7 @@ int main(int argc, char** argv) {
 	(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
 	if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
-		perror("llopen");
+		printf("\nError in ll_open\n");
 		return -1;
 	}
 
@@ -59,7 +100,7 @@ int main(int argc, char** argv) {
 		printf("\n______________________________Sending control packet 1____________________________________\n");
 
 		if (sendFile() < 0) {
-			perror("sendFile");
+			printf("\nError in sendFile\n");
 			return -1;
 		}
 
@@ -69,7 +110,7 @@ int main(int argc, char** argv) {
 		printf("\n______________________________Receiving control packet 1____________________________________\n");
 
 		if (readFile() < 0) {
-			perror("readFile");
+			printf("\nError in readFile\n");
 			return -1;
 		}
 
@@ -77,7 +118,7 @@ int main(int argc, char** argv) {
 	}
 
 	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
-		perror("llclose");
+		printf("\nError in ll_close\n");
 		return -1;
 	}
 
@@ -159,7 +200,15 @@ int sendFile() {
 		}
 
 		printf("\nPacket size is: %d\n", i);
-		llwrite(stop, al, ll, infoPacket, i);
+		if (llwrite(stop, al, ll, infoPacket, i) < 0)
+		{
+		 printf("\nError in llwrite\n");
+		 free(packet_1);
+		 free(fullFileStart);
+		 fclose(pfd);
+		 free(infoPacket);
+		 return -1;
+		}
 
 		free(infoPacket);
 		packetCounter++;
