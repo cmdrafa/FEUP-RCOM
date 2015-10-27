@@ -226,13 +226,13 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 		printf("\nThis is the sender...");
 
 		tcflush((*al).fd, TCIFLUSH);
-		while(*count < ATTEMPTS) {
+		while(*count < (*ll).numTransmissions) {
 
 			if(&flag) {
 				alarm(TIMEOUT);
 
 				//printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
-				
+
 				tcflush((*al).fd, TCOFLUSH);
 
 				writeMsg(al, A_1, C_SET);
@@ -246,6 +246,8 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 			}
 		}
 		//****************************************************************************
+		if (*count == (*ll).numTransmissions)
+			return -1;
 	}
 	else if ((*al).status == 'R') {
 		printf("\nThis is the receiver");
@@ -256,6 +258,7 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 	}
 
 	printf("\n----------------------------------------------------\nFinished ll_open()");
+	return 0;
 }
 
 int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
@@ -324,15 +327,15 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	}
 	else if (*(*buffer + 2) == C_1) {
 		printf("\nSequence number received was: 1");
-	}	
+	}
 
 	printf(" | Sequence number asked was: %d", (*ll).sequenceNumber);
-	
+
 	printf("\nA: 0x%x", *(*buffer + 1));
 	printf("\nC: 0x%x", *(*buffer + 2));
 	printf("\nBcc1: 0x%x", *(*buffer + 3));
 	printf("\nBcc2: 0x%x", *(*buffer + sizeOfInfoRead - 2));
-	
+
 	int length = sizeOfInfoRead - 6;
 	int q = 4;
 	char bcc2 = 0x0;
@@ -374,7 +377,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 		free(buffer_2);
 		return -3;
 	}
-	
+
 	free(buffer_2);
 
 	sizeOfInfoRead = removeFrameHeaderAndTrailer(buffer, sizeOfInfoRead);
@@ -383,7 +386,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 }
 
 int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
-	
+
 	//Fill the toSend char array
 	char * toS = malloc(sizeof(char) * (length + 6));
 	char * toSend = malloc(sizeof(char) * (length + 6));
@@ -412,7 +415,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	  *(toSend + length + 4) = *(toSend + length + 4) ^ *(toSend + q);
 	  q++;
 	}
-		
+
 	*(toSend + length + 5) = FLAG;
 
 	strcpy(toS, toSend);
@@ -420,8 +423,8 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	printf("\nA: 0x%x", *(toSend + 1));
 	printf("\nC: 0x%x", *(toSend + 2));
 	printf("\nBcc1: 0x%x", *(toSend + 3));
-	printf("\nBcc2: 0x%x", *(toSend + length - 4));
-	
+	printf("\nBcc2: 0x%x", *(toSend + length + 4));
+
 	//Finished filling the char array
 
 	int bufSize = 0;
@@ -436,7 +439,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 		if(&flagPointer) {
 			alarm(TIMEOUT);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
-		       
+
 			tcflush((*al).fd, TCOFLUSH);
 			write(al->fd, toSendStuffed, bufSize); //Sending the info
 			//*******************************************

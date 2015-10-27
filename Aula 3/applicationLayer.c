@@ -9,9 +9,34 @@ applicationLayer * al;
 linkLayer * ll;
 
 int main(int argc, char** argv) {
+
+	//********************* Check if the arguments are corrected *****************************
+	if (argc != 1)
+	{
+		printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
+		exit(1);
+	}
+	//****************************************************************************************
+
+
+
 	al = malloc(sizeof(applicationLayer));
 	ll = malloc(sizeof(linkLayer));
 	fillLinkLayer();
+
+	int firstChoice = -1;
+	while (firstChoice < 0) { firstChoice = initialMenu(); }
+
+	if (firstChoice == 1) {	(*al).status = 'W';	}
+	else { (*al).status = 'R';	}
+
+	firstChoice = -1;
+	while (firstChoice < 0) {	firstChoice = choosePort(); }
+
+	char port[] = "/dev/ttySX\0";
+	if (firstChoice == 1) { port[9] = '0'; }
+	else { port[9] = '4'; }
+	strncpy((*ll).port, port, 11);
 
 	count = malloc(sizeof(int));
 	flag = malloc(sizeof(int));
@@ -21,18 +46,7 @@ int main(int argc, char** argv) {
 	*stop = FALSE;
 
 	struct termios oldtio;
-	//********************* Check if the arguments are corrected *****************************
-	if ( (argc < 3) || ((strcmp("/dev/ttyS0", argv[1])!=0) && (strcmp("/dev/ttyS1", argv[1])!=0) &&	(strcmp("/dev/ttyS4", argv[1])!=0)))
-	{
-		printf("Usage:\tnserial SerialPort\n\tex: nserial /dev/ttyS1\n");
-		exit(1);
-	}
-	//****************************************************************************************
 
-	(*al).status = *argv[2];
-
-	strncpy((*ll).port, argv[1], strlen(argv[1]));
-	(*ll).port[strlen(argv[1])] = '\0';
 
 	(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
 
@@ -78,6 +92,7 @@ int main(int argc, char** argv) {
 
 	return 0;
 }
+
 
 void fillLinkLayer() {
 	(*ll).baudRate = BAUDRATE;
@@ -180,9 +195,9 @@ int readFile() {
 			if (sizeOfPacket < 0)
 				free(packet_1);
 		}
-		
+
 		printf("\nSize of packet is: %d\n", sizeOfPacket);
-		
+
 		if (sizeOfPacket < 0) {
 			free(packet_1);
 			continue;
