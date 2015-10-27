@@ -315,7 +315,7 @@ int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLay
 int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	int flagT = FALSE;
 
-	char * buffer_2 = malloc(sizeof(char) * ((MAX_PACKET_SIZE * 2) + 16));
+	char * buffer_2 = malloc(sizeof(char) * ((((*ll).packSize - 6) * 2) + 16));
 
 	int nRead = -1;
 	while (nRead < 0) {
@@ -612,7 +612,7 @@ char * stuff(char ** unStuffed, int unStuffedLength, int * bufSize) {
 }
 
 int unStuff(char * unstuffed, char ** stuffed) {
-	char * temp = malloc(sizeof(char) * ((MAX_PACKET_SIZE * 2) + 16));
+	char * temp = malloc(sizeof(char) * ((((*ll).packSize - 6) * 2) + 16));
 
 	int stuffedC = 0;
 	int end = FALSE;
