@@ -177,6 +177,8 @@ int readFile() {
 
 		while (sizeOfPacket < 0) {
 			sizeOfPacket = llread(al, ll, &packet_1);
+			if (sizeOfPacket < 0)
+				free(packet_1);
 		}
 		
 		printf("\nSize of packet is: %d\n", sizeOfPacket);
