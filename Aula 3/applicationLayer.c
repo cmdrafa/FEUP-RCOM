@@ -81,7 +81,12 @@ int main(int argc, char** argv) {
 	
 	firstChoice = -1;
 	while (firstChoice < 0) { firstChoice = chooseMaxSize(); }
-	(*ll).packSize = firstChoice + 10;
+	(*ll).packSize = firstChoice;
+	
+	firstChoice = -1;
+	while (firstChoice < 0) { firstChoice = chooseTimeout(); }
+	(*ll).timeout = firstChoice;
+	
 	
 	count = malloc(sizeof(int));
 	flag = malloc(sizeof(int));

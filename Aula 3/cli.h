@@ -9,3 +9,5 @@
   int chooseBaudrate();
   
   int chooseMaxSize();
+  
+  int chooseTimeout();
