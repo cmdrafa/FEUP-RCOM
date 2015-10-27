@@ -10,3 +10,5 @@
 	int sendFile();
 
 	void getNameAndSizeOfFile(char ** packet_1, int sizeOfPacket, int * fileSize, char ** fileName);
+
+	Statistics* initStat(Statistics * stats);

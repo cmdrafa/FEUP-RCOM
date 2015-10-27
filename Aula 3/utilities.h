@@ -52,12 +52,29 @@ typedef struct {
 } applicationLayer;
 
 typedef struct {
+	int sentMessages;
+	int receivedMessages;
+
+	int timeouts;
+
+	int numSentRR;
+	int numReceivedRR;
+
+	int numSentREJ;
+	int numReceivedREJ;
+} Statistics;
+
+typedef struct {
   char port[20];
   int baudRate;
   unsigned int sequenceNumber;
   unsigned int timeout;
   unsigned int numTransmissions;
   int packSize;
+  
+  Statistics * stat;
 } linkLayer;
+
+
 
 int getFileSize(FILE* file);

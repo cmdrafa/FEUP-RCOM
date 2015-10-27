@@ -18,3 +18,5 @@
   void showInitialInfo(linkLayer * ll, applicationLayer * al);
   
   void printProgressBar(int current, int total);
+  
+  void printStats(applicationLayer * al, Statistics * stats);

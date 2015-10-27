@@ -137,6 +137,8 @@ int main(int argc, char** argv) {
 		}
 	}
 	
+	printStats(al, ll->stat);
+	
 	printf("\n\n####  Terminating connection...   ####\n");
 	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_close\n");
@@ -149,6 +151,7 @@ int main(int argc, char** argv) {
 	free(stop);
 
 	free(al);
+	free((*ll).stat);
 	free(ll);
 
 	//printf("\nTerminated!\n");
@@ -156,6 +159,16 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+Statistics* initStat(Statistics * stats) {
+  (*stats).sentMessages = 0;
+  (*stats).receivedMessages = 0;
+  (*stats).timeouts = 0;
+  (*stats).numSentRR = 0;
+  (*stats).numReceivedRR = 0;
+  (*stats).numSentREJ = 0;
+  (*stats).numReceivedREJ = 0;
+  return;
+}
 
 void fillLinkLayer() {
 	(*ll).baudRate = BAUDRATE;
@@ -164,6 +177,9 @@ void fillLinkLayer() {
 	(*ll).numTransmissions = ATTEMPTS;
 	(*ll).packSize = MAX_PACKET_SIZE + 6;
 	(*al).debug = FALSE;
+	
+	(*ll).stat = malloc(sizeof(Statistics));
+	initStat((*ll).stat);
 }
 
 char * createFirstControlPacket(int * packetSize, char ** fileSizeChar) {
@@ -251,6 +267,7 @@ int sendFile() {
 		
 		free(infoPacket);
 		packetCounter++;
+		(*ll).stat->sentMessages++;
 	}
 	printf("\n");
 

@@ -303,3 +303,39 @@ void printProgressBar(int current, int total) {
   printf("]");
   fflush(stdout);
 }
+
+void printStats(applicationLayer * al, Statistics * stats){
+  clearScreen();
+  
+	int numReceivedRR;
+	int numReceivedREJ;
+    
+	if ((*al).status == 'W') {
+    printf("\n\n\n"
+    "                                    \n"
+    "         # Final Statistics #       \n"
+    "                                    \n"
+    "                                    \n"
+    "       Sent Messages: %d\n"
+    "      Total Timeouts: %d\n"
+    "         Received RR: %d\n"
+    "        Received REJ: %d\n\n"
+    "************************************\n"
+    "\n\n", stats->sentMessages, stats->timeouts, stats->numReceivedRR, stats->numReceivedREJ);
+	} else {
+	      printf("\n\n\n"
+    "                                    \n"
+    "         # Final Statistics #       \n"
+    "                                    \n"
+    "                                    \n"
+    "     Received Messages: %d\n"
+    "        Total Timeouts: %d\n"
+    "               Sent RR: %d\n"
+    "              Sent REJ: %d\n\n"
+    "************************************\n"
+    "\n\n", stats->receivedMessages, stats->timeouts, stats->numSentRR, stats->numSentREJ);
+	}
+  
+
+  return;
+}
