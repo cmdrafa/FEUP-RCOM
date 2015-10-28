@@ -1,12 +1,12 @@
 \select@language {portuguese}
-\contentsline {section}{\numberline {1}Sum\IeC {\'a}rio}{4}
-\contentsline {section}{\numberline {2}Introdu\IeC {\c c}\IeC {\~a}o}{4}
-\contentsline {section}{\numberline {3}Arquitetura}{4}
-\contentsline {section}{\numberline {4}Estrutura do c\IeC {\'o}digo}{4}
-\contentsline {section}{\numberline {5}Casos de uso principais}{4}
-\contentsline {section}{\numberline {6}Protocolo de liga\IeC {\c c}\IeC {\~a}o l\IeC {\'o}gica}{4}
-\contentsline {section}{\numberline {7}Protocolo de aplica\IeC {\c c}\IeC {\~a}o}{4}
-\contentsline {section}{\numberline {8}Valida\IeC {\c c}\IeC {\~a}o}{5}
-\contentsline {section}{\numberline {9} Elementos de valoriza\IeC {\c c}\IeC {\~a}o}{5}
-\contentsline {section}{\numberline {10}Conclus\IeC {\~o}es}{5}
-\contentsline {section}{\numberline {11}Anexos}{5}
+\contentsline {section}{\numberline {1}Sum\IeC {\'a}rio}{3}
+\contentsline {section}{\numberline {2}Introdu\IeC {\c c}\IeC {\~a}o}{3}
+\contentsline {section}{\numberline {3}Arquitetura}{3}
+\contentsline {section}{\numberline {4}Estrutura do c\IeC {\'o}digo}{3}
+\contentsline {section}{\numberline {5}Casos de uso principais}{3}
+\contentsline {section}{\numberline {6}Protocolo de liga\IeC {\c c}\IeC {\~a}o l\IeC {\'o}gica}{3}
+\contentsline {section}{\numberline {7}Protocolo de aplica\IeC {\c c}\IeC {\~a}o}{3}
+\contentsline {section}{\numberline {8}Valida\IeC {\c c}\IeC {\~a}o}{4}
+\contentsline {section}{\numberline {9} Elementos de valoriza\IeC {\c c}\IeC {\~a}o}{4}
+\contentsline {section}{\numberline {10}Conclus\IeC {\~o}es}{4}
+\contentsline {section}{\numberline {11}Anexos}{4}
