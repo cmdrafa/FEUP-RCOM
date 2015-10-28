@@ -216,9 +216,6 @@ int sendFile() {
 	char * packet_1 = createFirstControlPacket(&packetSize, &fileSizeChar);
 	free(fileSizeChar);
 
-	printf("\n\n%s\n\n", packet_1);
-
-
 	//Sends First control packet
 	if ((*al).debug == TRUE) {
 	printf("\n_________________________________________________\nFirst Control Packet");
