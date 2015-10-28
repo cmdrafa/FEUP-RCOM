@@ -128,6 +128,7 @@ int main(int argc, char** argv) {
 		printf("\n______________________________Receiving control packet 1____________________________________\n");
 		}
 
+		printf("\n");
 		if (readFile() < 0) {
 			printf("\nError in readFile\n");
 			return -1;
@@ -314,6 +315,9 @@ int readFile() {
 		} else if (*packet_1 == '2') {
 			cn = TRUE;
 			//FILE * pfd = fopen("./ola/ola2.txt", "w");
+			
+			printf("\n\n\n\n\n%s\n\n\n\n\n", fileName);
+			
 			FILE * pfd = fopen("./received/pinguimR.gif", "w");
 			fwrite(finalFile, fileSize, 1, pfd);
 

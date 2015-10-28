@@ -334,7 +334,7 @@ void printStats(applicationLayer * al, Statistics * stats){
     "               Sent RR: %d\n"
     "              Sent REJ: %d\n\n"
     "************************************\n"
-    "\n", stats->receivedMessages, stats->timeouts, stats->numSentRR, stats->numSentREJ);
+    "\n", stats->receivedMessages, stats->numSentRR, stats->numSentREJ);
 	}
   
 
