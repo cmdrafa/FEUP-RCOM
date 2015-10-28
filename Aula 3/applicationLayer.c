@@ -314,11 +314,7 @@ int readFile() {
 			continue;
 		} else if (*packet_1 == '2') {
 			cn = TRUE;
-			//FILE * pfd = fopen("./ola/ola2.txt", "w");
-			
-			printf("\n\n\n\n\n%s\n\n\n\n\n", fileName);
-			
-			FILE * pfd = fopen("./received/pinguimR.gif", "w");
+			FILE * pfd = fopen("./received/pinguim.gif", "w");
 			fwrite(finalFile, fileSize, 1, pfd);
 
 			fclose(pfd);
@@ -354,14 +350,14 @@ void getNameAndSizeOfFile(char ** packet_1, int sizeOfPacket, int * fileSize, ch
 	int j = *(*packet_1 + 2) - 1;
 	int i = 3;
 
-	*fileName = malloc(sizeof(char) * (j + 1));
+	*fileName = malloc(sizeof(char) * (j + 2));
 
 	//Get the name of the file
 	while (i < (j + 3)) {
 		*(*fileName + (i - 3)) = *(*packet_1 + i);
 		i++;
 	}
-	*(*fileName + (i - 3)) = '\0';
+	*(*fileName + (i - 2)) = '\0';
 
 	//Get the size of the file
 	i++;	//Size of the byte that describes the size
