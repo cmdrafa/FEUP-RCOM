@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 	if (firstChoice == 1) { port[9] = '0'; }
 	else { port[9] = '4'; }
 	strncpy((*ll).port, port, 11);
-    
+
 	firstChoice = -1;
 	while (firstChoice == -1) { firstChoice = chooseBaudrate(); }
 	switch(firstChoice) {
@@ -78,19 +78,19 @@ int main(int argc, char** argv) {
 	    printf("\nError in choice of baudrate\n");
 	    return -1;
 	}
-	
+
 	firstChoice = -1;
 	while (firstChoice < 0) { firstChoice = chooseMaxSize(); }
 	(*ll).packSize = firstChoice;
-	
+
 	firstChoice = -1;
 	while (firstChoice < 0) { firstChoice = chooseTimeout(); }
 	(*ll).timeout = firstChoice;
-	
+
 	firstChoice = -1;
 	while (firstChoice < 0) { firstChoice = chooseNumTransmissions(); }
 	(*ll).numTransmissions = firstChoice;
-	
+
 	count = malloc(sizeof(int));
 	flag = malloc(sizeof(int));
 	stop = malloc(sizeof(int));
@@ -101,9 +101,9 @@ int main(int argc, char** argv) {
 	struct termios oldtio;
 
 	(void) signal(SIGALRM, triggerAlarm); // instala rotina que atende interrupcao
-	
+
 	showInitialInfo(ll, al);
-	
+
 	printf("\n####  Attempting connection...   ####\n");
 	if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_open\n");
@@ -137,9 +137,9 @@ int main(int argc, char** argv) {
 		printf("\n______________________________Received control packet 1_______________________________________\n");
 		}
 	}
-	
+
 	printStats(al, ll->stat);
-	
+
 	printf("\n\n####  Terminating connection...   ####\n");
 	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
 		printf("\nError in ll_close\n");
@@ -178,7 +178,7 @@ void fillLinkLayer() {
 	(*ll).numTransmissions = ATTEMPTS;
 	(*ll).packSize = MAX_PACKET_SIZE + 6;
 	(*al).debug = FALSE;
-	
+
 	(*ll).stat = malloc(sizeof(Statistics));
 	initStat((*ll).stat);
 }
@@ -204,7 +204,7 @@ int sendFile() {
 
 	FILE * pfd = fopen("./pinguim.gif", "r");
 	int fileSize = getFileSize(pfd);
-	
+
 	printf("\n\nSize of file expected: %d\n\n", fileSize);
 
 	char * fullFile = malloc(sizeof(char) * fileSize);
@@ -215,7 +215,9 @@ int sendFile() {
 
 	char * packet_1 = createFirstControlPacket(&packetSize, &fileSizeChar);
 	free(fileSizeChar);
-	
+
+	printf("\n\n%s\n\n", packet_1);
+
 
 	//Sends First control packet
 	if ((*al).debug == TRUE) {
@@ -228,7 +230,7 @@ int sendFile() {
 	if ((fileSize % (((*ll).packSize - 6) - 4)) > 0)
 	numberOfPackets++;
 	while (packetCounter < numberOfPackets) {
-	  
+
 		if ((*al).debug == TRUE) {
 		printf("\n_________________________________________________\nPacket Number: %d", packetCounter);
 		}
@@ -247,7 +249,7 @@ int sendFile() {
 			fullFile++;
 			i++;
 		}
-		
+
 		if ((*al).debug == TRUE) {
 		printf("\nPacket size is: %d\n", i);
 		}
@@ -258,14 +260,14 @@ int sendFile() {
 		 free(fullFileStart);
 		 fclose(pfd);
 		 free(infoPacket);
-		 
+
 		 printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
-		 
+
 		 return -1;
 		}
-		
+
 		printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
-		
+
 		free(infoPacket);
 		packetCounter++;
 		(*ll).stat->sentMessages++;
@@ -314,12 +316,23 @@ int readFile() {
 			continue;
 		} else if (*packet_1 == '2') {
 			cn = TRUE;
-			FILE * pfd = fopen("./received/pinguim.gif", "w");
+
+			char * name = malloc(sizeof(char) * 50);
+			char path [] = "./received/";
+			int i = 0;
+			while (i < 11) {
+				*(name + i) = path[i];
+				i++;
+			}
+			strcpy(name+i, fileName);
+
+			FILE * pfd = fopen(name, "w");
 			fwrite(finalFile, fileSize, 1, pfd);
 
 			fclose(pfd);
 		} else if (*packet_1 == '1') {
 			getNameAndSizeOfFile(&packet_1, sizeOfPacket, &fileSize, &fileName);
+
 			finalFile = malloc(sizeof(char) * fileSize);
 			finalFileToStore = finalFile;
 		} else if (*packet_1 == '0') {
@@ -329,17 +342,17 @@ int readFile() {
 				i++;
 				finalFileToStore++;
 			}
-			
+
 			printProgressBar((packetCounter*(((*ll).packSize - 6)-4) + (i-4)), fileSize);
 			packetCounter++;
 			ll->stat->receivedMessages++;
-			
+
 		} else {
 			free(packet_1);
 		}
 	}
 	printf("\n");
-	
+
 	free(fileName);
 	free(finalFile);
 
@@ -347,7 +360,7 @@ int readFile() {
 }
 
 void getNameAndSizeOfFile(char ** packet_1, int sizeOfPacket, int * fileSize, char ** fileName) {
-	int j = *(*packet_1 + 2) - 1;
+	int j = *(*packet_1 + 2);
 	int i = 3;
 
 	*fileName = malloc(sizeof(char) * (j + 2));
@@ -357,10 +370,10 @@ void getNameAndSizeOfFile(char ** packet_1, int sizeOfPacket, int * fileSize, ch
 		*(*fileName + (i - 3)) = *(*packet_1 + i);
 		i++;
 	}
-	*(*fileName + (i - 2)) = '\0';
+	*(*fileName + (i - 3)) = '\0';
 
 	//Get the size of the file
-	i++;	//Size of the byte that describes the size
+	//i++;	//Size of the byte that describes the size
 	i++;	//Because of the 8 (size of 2 bytes)
 	char rest[sizeOfPacket - i];
 	j = i;
