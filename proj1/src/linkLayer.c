@@ -364,7 +364,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 		nRead = readInfo(al, &flagT, buffer_2);
 	}
 
-	int sizeOfInfoRead = unStuff(buffer_2, buffer, ll);
+	int sizeOfInfoRead = deStuff(buffer_2, buffer, ll);
 
 	if (*(*buffer + 2) == C_0) {
 		if ((*al).debug == TRUE) {
@@ -658,29 +658,29 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 	}
 }
 
-char * stuff(char ** unStuffed, int unStuffedLength, int * bufSize) {
-	int totalLength = ((unStuffedLength + 1) * 2) + 5;
+char * stuff(char ** deStuffed, int deStuffedLength, int * bufSize) {
+	int totalLength = ((deStuffedLength + 1) * 2) + 5;
 
 	char * toRet = malloc(sizeof(char) * totalLength);
 	int i = 4;
 	int j = 0;
 	while (j < 4) {
-		*(toRet + j) = *(*unStuffed + j);
+		*(toRet + j) = *(*deStuffed + j);
 		j++;
 	}
-	while (i < (unStuffedLength - 1)) {
-		if (*(*unStuffed + i) == FLAG) {
+	while (i < (deStuffedLength - 1)) {
+		if (*(*deStuffed + i) == FLAG) {
 			*(toRet + j) = ESCAPE;
 			j++;
 			*(toRet + j) = FLAG_EXC;
 		}
-		else if (*(*unStuffed + i) == ESCAPE) {
+		else if (*(*deStuffed + i) == ESCAPE) {
 			*(toRet + j) = ESCAPE;
 			j++;
 			*(toRet + j) = ESCAPE_EXC;
 		}
 		else {
-			*(toRet + j) = *(*unStuffed + i);
+			*(toRet + j) = *(*deStuffed + i);
 		}
 		i++;
 		j++;
@@ -692,7 +692,7 @@ char * stuff(char ** unStuffed, int unStuffedLength, int * bufSize) {
 	return toRet;
 }
 
-int unStuff(char * unstuffed, char ** stuffed, linkLayer * ll) {
+int deStuff(char * deStuffed, char ** stuffed, linkLayer * ll) {
         
 	char * temp = malloc(sizeof(char) * ((((*ll).packSize - 6) * 2) + 16));
 
@@ -700,27 +700,27 @@ int unStuff(char * unstuffed, char ** stuffed, linkLayer * ll) {
 	int end = FALSE;
 	while (end == FALSE) {
 
-		if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == FLAG_EXC)) {
+		if (((*deStuffed) == ESCAPE) && ((*(deStuffed + 1)) == FLAG_EXC)) {
 			(*(temp + stuffedC)) = FLAG;
-			unstuffed++;
+			deStuffed++;
 		}
-		else if (((*unstuffed) == ESCAPE) && ((*(unstuffed + 1)) == ESCAPE_EXC)) {
+		else if (((*deStuffed) == ESCAPE) && ((*(deStuffed + 1)) == ESCAPE_EXC)) {
 			(*(temp + stuffedC)) = ESCAPE;
-			unstuffed++;
+			deStuffed++;
 		}
 		else {
-			(*(temp + stuffedC)) = (*unstuffed);
+			(*(temp + stuffedC)) = (*deStuffed);
 		}
 
 
-		if ((stuffedC > 2) && (*(unstuffed + 1) == FLAG)) {
-			unstuffed++;
+		if ((stuffedC > 2) && (*(deStuffed + 1) == FLAG)) {
+			deStuffed++;
 			stuffedC++;
 			*(temp + stuffedC) = FLAG;
 			end = TRUE;
 		}
 
-		unstuffed++;
+		deStuffed++;
 		stuffedC++;
 	}
 

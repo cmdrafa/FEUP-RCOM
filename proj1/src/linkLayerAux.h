@@ -10,10 +10,10 @@ void triggerAlarm();
 
 int readSenderResponse(applicationLayer * al, linkLayer * ll);
 
-char * stuff(char **unStuffed, int unStuffedLength, int * bufSize);
+char * stuff(char **deStuffed, int deStuffedLength, int * bufSize);
 
 int readInfo(applicationLayer * al, int * flag, char * buffer);
 
-int unStuff(char * unstuffed, char ** stuffed, linkLayer * ll);
+int desStuff(char * destuffed, char ** stuffed, linkLayer * ll);
 
 int removeFrameHeaderAndTrailer(char ** buffer, int sizeOfInfoRead);

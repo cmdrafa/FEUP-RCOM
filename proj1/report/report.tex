@@ -26,7 +26,7 @@
 }
 
 \author{\textbf{Grupo xx:}\\
-Francisco Rodrigues - 2013lol\\
+Francisco Rodrigues - 201305627l\\
 João Nogueira - 201303882 \\
 Marta Lopes - 201208067 \\
 \linebreak\linebreak \\
@@ -85,27 +85,44 @@ Marta Lopes - 201208067 \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Sumário}
 
-Este relatório tem como objetivo explicar o primeiro projeto, realizado para esta unidade curricular, denominado "Protocolo de Ligação de Dados". Este projeto consiste no envio de informação de um computador para outro, através do uso de porta série. Foram assim implementados programas para ler e escrever a informação a ser enviada.
+Este relatório tem como objetivo explicar o primeiro projeto, realizado para esta unidade curricular, denominado "Protocolo de Ligação de Dados". Este projeto consiste no envio de informação de um computador para outro, através do uso de porta de série. Foram assim implementados programas para ler e escrever a informação a ser enviada.
 \par O projeto foi finalizado com sucesso, sendo que os dados foram enviados e recebidos de forma correcta. Foram também incluidos a prevenção e correção de erros ao longo da transmissão, restabelecendo a trasmissão quando os erros acontecem.
 
-
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introdução}
 
- (indicação dos objectivos do trabalho e do relatório; descrição da lógica do relatório com indicações sobre o tipo de informação que poderá ser encontrada em cada uma secções seguintes)
+O principal objetivo deste trabalho, que foi realizado ao longo das aulas laboratoriais de Redes de Computadores, consiste em implementar um protocolo de  ligação de dados, de acordo com a especificação descrita no guião, e também testar o protocolo com uma aplicação simples de transferência de ficheiros, igualmente especificada. 
+O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a linguagem de programação foi C e as portas de série existentes realizavam comunicação assíncrona. 
+\par O protocolo de  ligação de dados pretende assim fornecer um serviço de comunicação de dados fiável entre dois sistemas ligados por um cabo de série. As funções utilizadas serão a de criação e sincronismo de tramas que irão organizar os dados a ser enviados (\textit{framing}), a do estabelecimento/conclusão da ligação, a numeração de tramas, o controlo de fluxo, a confirmação de envio sem erros e o controlo dos erros que poderão ser criados por \textit{time-outs}, tramas fora da sequência esperada ou retransmissões. 
+\par Sendo assim, este relatório servirá para descrever o nosso trabalho de uma forma mais teórica para assim poderem ser avaliados certos pormenores que não seriam possíveis de avaliar na apresentação do projeto.
+\par O nosso relatório terá então as \textbf{secções principais} seguintes:
+
+\begin{itemize}
+	\item \textbf{Arquitetura}: especificação dos blocos funcionais e da \textit{interface};
+	\item \textbf{Estrutura do código}: API's, principais estruturas de dados, principais funções e a sua relação com a arquitetura;
+	\item \textbf{Casos de uso principais}: identificar os principais aspectos, abordando as sequências de chamadas de funções;
+	\item \textbf{Protocolo de ligação lógica}: identificar os principais aspectos funcionais da \textit{linkLayer}, descrevendo a estratégia de implementação;
+	\item \textbf{Protocolo de aplicação}:  identificar os principais aspectos funcionais da \textit{applicationLayer}, descrevendo a estratégia de implementação;
+	\item \textbf{Validação}: testes efetuados ao programa com apresentação de resultados;
+	\item \textbf{Elementos de valorização}: identificação dos elementos implementados, descrevendo a estratégia de implementação.
+\end{itemize}
 
 
+ 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Arquitetura}
 
  (blocos funcionais e interfaces)
 
-
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Estrutura do código}
 
  (APIs, principais estruturas de dados, principais funções e sua relação com a arquitetura)
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Casos de uso principais}
 
@@ -113,14 +130,58 @@ Este relatório tem como objetivo explicar o primeiro projeto, realizado para es
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Protocolo de ligação lógica}
 
- (identificação dos principais aspectos funcionais; descrição da estratégia de implementação destes aspectos com apresentação de extratos de código)
+O protocolo de ligação lógica está implementado na camada \textit{linkLayer}, camada da qual depende a camada \textit{applicationLayer}.
+\begin{center}
+\line(1,0){250}
+\end{center}
+\textbf{Principais aspectos funcionais:}
+\begin{itemize}
+  \item Configurar a porta de série como é pretendido;
+  \item Repôr a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
+  \item  Estabelecer a ligação de dados utilizando a porta de série;
+  \item  Enviar comandos;
+  \item  Enviar/receber mensagens;
+  \item Processo de \textit{Stuffing} e \textit{Destuffing} dos \textit{packets} recebidos da camada \textit{applicationLayer}.
+\end{itemize}
 
+\begin{center}
+\line(1,0){250}
+\end{center}
+\textbf{Funções implementadas na \textit{linkLayer}:}
+  \begin{enumerate}
+  \item\textbf{llopen}
+
+	Esta função é responsável por configurar a porta de série com as opções pretendidas (utilizando, por exemplo, o \textit{baudRate} escolhido pelo utilizador) e por guardar numa variável que passa por argumento à função \textit{configure}.
+	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida terimina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
+   	
+  \item\textbf{llclose}
+   
+    Do lado do receptor, esta função começa por aguardar a recepção do comando DISC, respondendo com o mesmo comando. Após o envio deste comando, e imediatamente antes de reestabelecer as configurações originais da porta de série aguarda a recepção do comando UA por parte do emissor.
+	Do lado do emissor, esta função começa por eviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
+    Termina por fazer \textit{resetConfiguration}, função na qual é feito um \textit{sleep} de um segundo por forma a garantir que as configurações originais da porta de série não são restabelecidas antes de que toda a informação tenha sido passada.
+   
+\item\textbf{llwrite}
+    
+	Esta função começa por alocar memória num \textit{buffer} no qual a informação será organizada (antes do processo de \textit{stuffing}). Após alocar a memória necessária começa por atribuir os valores de FLAG, A, C e BCC de acordo com o número de sequência da trama. A partir de BCC é copiada para o buffer toda a informação recebida por argumento desta função da \textit{applicationLayer} correspondente ao \textit{packet} a enviar. Antes de terminar o preenchimento do \textit{buffer} coloca o BCC2 ('ou' exclusivo dos octetos do \textit{packet}) e a FLAG para terminar.
+	Depois de ter a trama preenchida e antes de começar o processo de envio, envia o \textit{buffer} para a função \textit{stuff} que retorna um \textit{buffer} com a trama pronta para envio.
+	Envia a trama através da porta de série e aguarda a resposta por parte do recetor, o que vai determinar o caminho a seguir pela função, que pode variar entre terminar a função pois houve a recepção de RR, ou re-enviar a mesma trama por ter sido rejeitada.
+	A mesma trama pode ser re-enviada por ocorrência de \textit{timeout}, o que também é controlado nesta função através da implementação de alarmes.
+	Esta função pode também terminar pela ocorrência de \textit{timeouts} maior do que o número máximo definido previamente pelo utilizador.
+	
+ \item  \textbf{llread}
+   
+    A função \textit{llread} começa por alocar memória para o \textit{buffer} que vai ser recebido, entrando imediatamente a seguir num ciclo do ual apenas sai quando algo é lido da porta de série.
+	Após a leitura o \textit{buffer} lido é passado para a função responsável pelo processo de \textit{destuffing} que retorna a trama de Informação recebida "descodificada". 
+	Os valores de BCC e de BCC2 são verificados por forma a garantir que a trama foi recebida sem erros, caso o tenha sido é interpretado o número de sequência e se tudo for o pretendido é enviado o comando RR, caso contrário é enviado o comando REJ, pedindo que a mesma seja enviada novamente.
+\end{enumerate}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Protocolo de aplicação}
  (identificação dos principais aspectos funcionais; descrição da estratégia de implementação destes aspectos com apresentação de extractos de código)
@@ -128,6 +189,7 @@ Este relatório tem como objetivo explicar o primeiro projeto, realizado para es
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Validação}
 
@@ -135,6 +197,7 @@ Este relatório tem como objetivo explicar o primeiro projeto, realizado para es
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{ Elementos de valorização}
   (identificação dos elementos de valorização implementados; descrição da estratégia de implementação com apresentação de pequenos extratos de código) 
@@ -142,6 +205,7 @@ Este relatório tem como objetivo explicar o primeiro projeto, realizado para es
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusões}
  (síntese da informação apresentada nas secções anteriores; reflexão sobre os objectivos de aprendizagem alcançados)
@@ -149,6 +213,7 @@ Este relatório tem como objetivo explicar o primeiro projeto, realizado para es
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Anexos}
 
