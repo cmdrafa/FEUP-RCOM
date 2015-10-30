@@ -202,35 +202,12 @@ O protocolo de aplicação está implementado na camada applicationLayer, camada
 \end{itemize}
   
   \subsection{Funções implementadas na \textit{applicationLayer}}
-	\textbf{main}
-    
-	Chama as diversas funções da \textit{Interface} do utilizador e recebe o seu \textit{input} por forma a inicializar o programa com as configurações desejadas pelo utilizador. Chama as funções \textit{ll\_open, ll\_close}, \textit{readFile} e \textit{sendFile}.\newline
-	
-   \textbf{initStat}
-   
-    Função responsável por inicializar os valores da estrutura de estatística. Esta estrutura é utilizada para que, no final da execução do programa, o utilizador esteja a par do que aconteceu no desenrolar do programa.\newline
-	
-  \textbf{fillLinkLayer}
-   
-    Função responsável por inicializar a estrutura\textit{ linkLayer}, estrutura essa passada para muitas das funções utilizadas ao longo do programa. Nesta estrutura estão atributos como por exemplo: \textit{baudRate, timeout}, etc.\newline
-	
-   \textbf{createFirstControlPacket}
-   
-    Função responsável por gerar o primeiro pacote de controlo. É colocado neste pacote o tamanho do ficheiro a enviar bem como o nome do mesmo.\newline
-	
-    \textbf{getNameAndSizeOfFile}
-   
-    Esta função é responsável por, dado o primeiro pacote de controlo recebido, interpretar qual o nome e tamanho do ficheiro a receber.\newline
-	
-   \textbf{sendFile}
-   
-    Esta função começa por ler toda a informação do ficheiro a enviar e guarda-a num \textit{buffer} de chars, \textit{buffer} a partir do qual a informação será lida para envio. Após a leitura chama a função responsável pelo envio do primeiro pacote de controlo e envia-o para o recetor chamando \textit{llwrite} (função do pacote de ligação). Depois do envio do primeiro pacote de controlo é calculado o número de pacotes necessários a enviar tendo em conta o tamanho máximo definido previamente pelo utilizador, e entra num ciclo que é percorrido o número de vezes igual ao número de pacotes de dados. Neste ciclo é, inicialmente criado o pacote de dados, com a informação necessária (C, número de sequência, número de octetos do campo de dados) e com os dados em si. É chamada a função \textit{llwrite} para enviar o pacote e repete-se o ciclo até ao final do envio dos dados (atualizando sempre a barra de progresso no ecrã).\newline
-   
-    \textbf{readFile}
-   
-    Esta é a função responsável pela recepção de todo o ficheiro e pela sua escrita em disco. Começa por entrar num ciclo que termina quando o último pacote de controlo é lido. Dentro do ciclo o primeiro passo é chamar a função \textit{llread }que retorna, após a leitura, o pacote a interpretar.
-	São então tomadas medidas diferentes nos casos de ser o primeiro pacote de controlo, o último pacote de controlo ou um pacote de dados. No caso de ser o primeiro pacote de controlo é guardada a informação do nome e tamanho do ficheiro. No caso de ser o último pacote de controlo é criado o ficheiro e toda a informação lida, até agora guardada num\textit{ buffer}, é escrita em disco. No caso de ser um pacote de dados a informação é adicionada no final do \textit{buffer} de leitura.
-	Sempre que um pacote é lido é atualizada a barra de progresso.\newline
+
+A primeira função a ser implementada em \textit{applicationLayer} foi a função \textbf{main} que chama e gere as diversas funções da \textit{Interface} para o programa inicializar com as configurações desejadas pelo utilizador. Vai também chamar as funções \textit{ll\_open, ll\_close, readFile e sendFile}. 
+\par De seguida, é implementada a função \textbf{initStat} que será responsável por inicializar os valores da \textit{struct} que vai conter as estatísticas finais do programa.
+\par É implementada também a função \textbf{fillLinkLayer} que inicializa a \textit{struct linkLayer} onde estão atributos como \textit{baudRate, timeout}, etc.
+\par A próxima função implementada foi a \textbf{createFirstControlPacket} que vai gerir o primeiro pacote de controlo, é neste pacote que é enviado o tamanho do ficheiro a enviar bem como o nome do mesmo.
+\par Foram também implementadas as funções \textbf{sendFile} e \textbf{readFile}. Na função \textit{sendFile} vai ser lida toda a informação do ficheiro a enviar e guarda-la num \textit{buffer} de chars, a partir do qual a informação será lida para o envio. Após a leitura chama a função responsável pelo envio do primeiro \textit{control packet} e envia-o para o recetor, o \textit{llwrite}. Depois do envio do primeiro \textit{control packet} é calculado o número de pacotes necessários a enviar tendo em conta o tamanho máximo definido pelo utilizador. Os pacotes de dados vão sendo criados com a informação necessária e com os dados do ficheiro em si, sendo chamada a função \textit{llwrite} para enviar os vários pacotes individualmente. Em \textit{readFile} o ficheiro vai sendo recebido e escrito em disco. Cada pacote vai ser interpretado, depois de passar pela função \textit{llread}, e vão ser tomadas medidas diferentes dependendo de que pacote for (primeiro, último ou um pacote de dados). Se for o primeiro \textit{control packet} é guardada a informação do nome e tamanho do ficheiro. Se for o último é criado o ficheiro e toda a informação lida é escrita em disco. Se for um pacote de dados a informação é adicionada ao final do \textit{buffer} de leitura.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
