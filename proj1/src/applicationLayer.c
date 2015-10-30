@@ -183,15 +183,28 @@ void fillLinkLayer() {
 	initStat((*ll).stat);
 }
 
-char * createFirstControlPacket(int * packetSize, char ** fileSizeChar) {
+char * createFirstControlPacket(int * packetSize, char ** fileSizeChar, char ** name) {
 	*packetSize = 24;
 	char * control = malloc(sizeof(char) * (*packetSize));
 	int sizeOfName = 11;
 	uint8_t size = (sizeOfName & 0xFF);
 	//char con[] = "10 ola.txt18";
-	char con[] = "10 pinguim.gif18";
-	con[2] = size;
-	strcpy(control, con);
+	char * co = malloc(sizeof(char) * 100);
+	*co = '1';
+	*(co+1) = '0';
+	*(co+2) = size;
+	int i = 3;
+	while (i < (i + (int)strlen(*name))) {
+		*(co + i) = *(*name + (i-3));
+		i++;
+	}
+	*(co + i) = '1';
+	*(co + i + 1) = '8';
+	*(co + i + 2) = '\0';
+	/*char con[] = "10 pinguim.gif18";
+	con[2] = size;*/
+	strcpy(control, co);
+	free(co);
 
 	//strncpy(control + 12, *fileSizeChar, 8);
 	strncpy(control + 16, *fileSizeChar, 8);
@@ -201,6 +214,12 @@ char * createFirstControlPacket(int * packetSize, char ** fileSizeChar) {
 
 int sendFile() {
 	int packetSize;
+
+	char * fileName;
+	fileName = malloc(sizeof(char) * 100);
+	chooseFileName(&fileName);
+
+	printf("\n\nChosen is: [%s] Size is: [%d]\n\n", fileName, (int)strlen(fileName));
 
 	FILE * pfd = fopen("./pinguim.gif", "r");
 	int fileSize = getFileSize(pfd);
@@ -213,7 +232,7 @@ int sendFile() {
 	char * fileSizeChar = malloc(sizeof(char) * 8);
 	sprintf(fileSizeChar, "%d", fileSize);
 
-	char * packet_1 = createFirstControlPacket(&packetSize, &fileSizeChar);
+	char * packet_1 = createFirstControlPacket(&packetSize, &fileSizeChar, &fileName);
 	free(fileSizeChar);
 
 	//Sends First control packet
@@ -281,6 +300,7 @@ int sendFile() {
 	free(packet_1);
 	free(fullFileStart);
 	fclose(pfd);
+	free(fileName);
 	return 0;
 }
 

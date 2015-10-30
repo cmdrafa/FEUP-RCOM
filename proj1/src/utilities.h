@@ -47,7 +47,7 @@
 typedef struct {
   int fd;
   char status;
-  
+
   int debug;
 } applicationLayer;
 
@@ -71,10 +71,12 @@ typedef struct {
   unsigned int timeout;
   unsigned int numTransmissions;
   int packSize;
-  
+
   Statistics * stat;
 } linkLayer;
 
 
 
 int getFileSize(FILE* file);
+
+char * getLine(void);
