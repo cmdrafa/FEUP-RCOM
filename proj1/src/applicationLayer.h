@@ -5,7 +5,7 @@
 
 	void fillLinkLayer();
 
-	char * createFirstControlPacket(int * packetSize, char ** fileSizeChar);
+	char * createFirstControlPacket(int * packetSize, char ** fileSizeChar, char ** name);
 
 	int sendFile();
 

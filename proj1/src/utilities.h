@@ -81,3 +81,5 @@ typedef struct {
 
 
 int getFileSize(FILE* file);
+
+char * getLine(void);

@@ -87,16 +87,15 @@ Marta Lopes - 201208067 \\
 \section{Sumário}
 
 Este relatório tem como objetivo explicar o primeiro projeto, realizado para esta unidade curricular, denominado "Protocolo de Ligação de Dados". Este projeto consiste no envio de informação de um computador para outro, através do uso de porta de série. Foram assim implementados programas para ler e escrever a informação a ser enviada.
-\par O projeto foi finalizado com sucesso, sendo que os dados foram enviados e recebidos de forma correcta. Foram também incluidos a prevenção e correção de erros ao longo da transmissão, restabelecendo a trasmissão quando os erros acontecem.
+\par O projeto foi finalizado com sucesso, sendo que os dados foram enviados e recebidos de forma correcta. Foram também incluídos a prevenção e correção de erros ao longo da transmissão, restabelecendo a transmissão quando os erros acontecem.
 
-\newpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introdução}
 
-O principal objetivo deste trabalho, que foi realizado ao longo das aulas laboratoriais de Redes de Computadores, consiste em implementar um protocolo de  ligação de dados, de acordo com a especificação descrita no guião, e também testar o protocolo com uma aplicação simples de transferência de ficheiros, igualmente especificada. 
+Iremos então descrever o nosso trabalho, que consiste em implementar um protocolo de  ligação de dados, de acordo com a especificação descrita no guião, de uma forma mais teórica e pormenorizada para assim poderem ser avaliados certos aspectos que não seriam possíveis avaliar durante a apresentação na aula. 
 O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a linguagem de programação foi C e as portas de série existentes realizavam comunicação assíncrona. 
-\par O protocolo de  ligação de dados pretende assim fornecer um serviço de comunicação de dados fiável entre dois sistemas ligados por um cabo de série. As funções utilizadas serão a de criação e sincronismo de tramas que irão organizar os dados a ser enviados (\textit{framing}), a do estabelecimento/conclusão da ligação, a numeração de tramas, o controlo de fluxo, a confirmação de envio sem erros e o controlo dos erros que poderão ser criados por \textit{time-outs}, tramas fora da sequência esperada ou retransmissões. 
-\par Sendo assim, este relatório servirá para descrever o nosso trabalho de uma forma mais teórica para assim poderem ser avaliados certos pormenores que não seriam possíveis de avaliar na apresentação do projeto.
+\par O protocolo de  ligação de dados pretende assim fornecer um serviço de comunicação de dados fiável entre dois sistemas ligados por um cabo de série. As funções utilizadas serão a de criação e sincronismo de tramas que irão organizar os dados a ser enviados (\textit{framing}), a do estabelecimento/conclusão da ligação, a numeração de tramas, o controlo de fluxo, a confirmação de envio sem erros e o controlo dos erros que poderão ser criados por \textit{timeouts}, tramas fora da sequência esperada ou retransmissões. 
 \par O nosso relatório terá então as \textbf{secções principais} seguintes:
 
 \begin{itemize}
@@ -110,8 +109,6 @@ O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a lingua
 \end{itemize}
 
 
- 
-\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Arquitetura}
 
@@ -126,7 +123,7 @@ A \textbf{camada de aplicação}, que vai depender da camada de ligação lógic
 \subsection{\textit{Interface}}
 
 A interface na linha de comandos está implementada nos ficheiros \textit{cli.c} e \textit{cli.h} que têm as funções que vão permitir a escolha de valores de alguns parâmetros referentes à transferência do ficheiro, existindo limites impostos de acordo com o guião. 
-Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o trasmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os paramêtros com a escolha feita pelo utilizador. 
+Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o transmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os parâmetros com a escolha feita pelo utilizador. 
 
 
 \newpage
@@ -152,7 +149,7 @@ O protocolo de ligação lógica está implementado na camada \textit{linkLayer}
 \subsection{Principais aspectos funcionais}
 \begin{itemize}
   \item Configurar a porta de série como é pretendido;
-  \item Repôr a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
+  \item Repor a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
   \item  Estabelecer a ligação de dados utilizando a porta de série;
   \item  Enviar comandos;
   \item  Enviar/receber mensagens;
@@ -165,12 +162,12 @@ O protocolo de ligação lógica está implementado na camada \textit{linkLayer}
  \subsubsection{ll\_open}
 
 	Esta função é responsável por configurar a porta de série com as opções pretendidas (utilizando, por exemplo, o \textit{baudRate} escolhido pelo utilizador) e por guardar numa variável que passa por argumento à função \textit{configure}.
-	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida terimina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
+	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida termina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
    	
   \subsubsection{ll\_close}
    
     Do lado do receptor, esta função começa por aguardar a recepção do comando DISC, respondendo com o mesmo comando. Após o envio deste comando, e imediatamente antes de reestabelecer as configurações originais da porta de série aguarda a recepção do comando UA por parte do emissor.
-	Do lado do emissor, esta função começa por eviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
+	Do lado do emissor, esta função começa por enviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
     Termina por fazer \textit{resetConfiguration}, função na qual é feito um \textit{sleep} de um segundo por forma a garantir que as configurações originais da porta de série não são restabelecidas antes de que toda a informação tenha sido passada.
    
  \subsubsection{llwrite}
@@ -205,35 +202,12 @@ O protocolo de aplicação está implementado na camada applicationLayer, camada
 \end{itemize}
   
   \subsection{Funções implementadas na \textit{applicationLayer}}
-	\textbf{main}
-    
-	Chama as diversas funções da \textit{Interface} do utilizador e recebe o seu \textit{input} por forma a inicializar o programa com as configurações desejadas pelo utilizador. Chama as funções \textit{ll\_open, ll\_close}, \textit{readFile} e \textit{sendFile}.\newline
-	
-   \textbf{initStat}
-   
-    Função responsável por inicializar os valores da estrutura de estatística. Esta estrutura é utilizada para que, no final da execução do programa, o utilizador esteja a par do que aconteceu no desenrolar do programa.\newline
-	
-  \textbf{fillLinkLayer}
-   
-    Função responsável por inicializar a estrutura\textit{ linkLayer}, estrutura essa passada para muitas das funções utilizadas ao longo do programa. Nesta estrutura estão atributos como por exemplo: \textit{baudRate, timeout}, etc.\newline
-	
-   \textbf{createFirstControlPacket}
-   
-    Função responsável por gerar o primeiro pacote de controlo. É colocado neste pacote o tamanho do ficheiro a enviar bem como o nome do mesmo.\newline
-	
-    \textbf{getNameAndSizeOfFile}
-   
-    Esta função é responsável por, dado o primeiro pacote de controlo recebido, interpretar qual o nome e tamanho do ficheiro a receber.\newline
-	
-   \textbf{sendFile}
-   
-    Esta função começa por ler toda a informação do ficheiro a enviar e guarda-a num \textit{buffer} de chars, \textit{buffer} a partir do qual a informação será lida para envio. Após a leitura chama a função responsável pelo envio do primeiro pacote de controlo e envia-o para o recetor chamando \textit{llwrite} (função do pacote de ligação). Depois do envio do primeiro pacote de controlo é calculado o número de pacotes necessários a enviar tendo em conta o tamanho máximo definido previamente pelo utilizador, e entra num ciclo que é percorrido o número de vezes igual ao número de pacotes de dados. Neste ciclo é, inicialmente criado o pacote de dados, com a informação necessária (C, número de sequência, número de octetos do campo de dados) e com os dados em si. É chamada a função \textit{llwrite} para enviar o pacote e repete-se o ciclo até ao final do envio dos dados (atualizando sempre a barra de progresso no ecrã).\newline
-   
-    \textbf{readFile}
-   
-    Esta é a função responsável pela recepção de todo o ficheiro e pela sua escrita em disco. Começa por entrar num ciclo que termina quando o último pacote de controlo é lido. Dentro do ciclo o primeiro passo é chamar a função \textit{llread }que retorna, após a leitura, o pacote a interpretar.
-	São então tomadas medidas diferentes nos casos de ser o primeiro pacote de controlo, o último pacote de controlo ou um pacote de dados. No caso de ser o primeiro pacote de controlo é guardada a informação do nome e tamanho do ficheiro. No caso de ser o último pacote de controlo é criado o ficheiro e toda a informação lida, até agora guardada num\textit{ buffer}, é escrita em disco. No caso de ser um pacote de dados a informação é adicionada no final do \textit{buffer} de leitura.
-	Sempre que um pacote é lido é atualizada a barra de progresso.\newline
+
+A primeira função a ser implementada em \textit{applicationLayer} foi a função \textbf{main} que chama e gere as diversas funções da \textit{Interface} para o programa inicializar com as configurações desejadas pelo utilizador. Vai também chamar as funções \textit{ll\_open, ll\_close, readFile e sendFile}. 
+\par De seguida, é implementada a função \textbf{initStat} que será responsável por inicializar os valores da \textit{struct} que vai conter as estatísticas finais do programa.
+\par É implementada também a função \textbf{fillLinkLayer} que inicializa a \textit{struct linkLayer} onde estão atributos como \textit{baudRate, timeout}, etc.
+\par A próxima função implementada foi a \textbf{createFirstControlPacket} que vai gerir o primeiro pacote de controlo, é neste pacote que é enviado o tamanho do ficheiro a enviar bem como o nome do mesmo.
+\par Foram também implementadas as funções \textbf{sendFile} e \textbf{readFile}. Na função \textit{sendFile} vai ser lida toda a informação do ficheiro a enviar e guarda-la num \textit{buffer} de chars, a partir do qual a informação será lida para o envio. Após a leitura chama a função responsável pelo envio do primeiro \textit{control packet} e envia-o para o recetor, o \textit{llwrite}. Depois do envio do primeiro \textit{control packet} é calculado o número de pacotes necessários a enviar tendo em conta o tamanho máximo definido pelo utilizador. Os pacotes de dados vão sendo criados com a informação necessária e com os dados do ficheiro em si, sendo chamada a função \textit{llwrite} para enviar os vários pacotes individualmente. Em \textit{readFile} o ficheiro vai sendo recebido e escrito em disco. Cada pacote vai ser interpretado, depois de passar pela função \textit{llread}, e vão ser tomadas medidas diferentes dependendo de que pacote for (primeiro, último ou um pacote de dados). Se for o primeiro \textit{control packet} é guardada a informação do nome e tamanho do ficheiro. Se for o último é criado o ficheiro e toda a informação lida é escrita em disco. Se for um pacote de dados a informação é adicionada ao final do \textit{buffer} de leitura.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -242,7 +216,60 @@ O protocolo de aplicação está implementado na camada applicationLayer, camada
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Validação}
 
- (descrição dos testes efectuados com apresentação quantificada dos resultados, se possível)
+Para verificar se a transferência do ficheiro \textit{pinguim.gif} foi efetuada com sucesso decidimos colocar uma verificação de inicio e fim de envio,  durante o envio do ficheiro adicionamos uma barra de progresso que iria sendo actualizada à medida que os packets iam sendo enviados. 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{trans1.png}
+\caption{Informações iniciais - Modo Transmissor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{trans2.png}
+\caption{Inicio do envio e barra de progresso - Modo Transmissor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{trans3.png}
+\caption{Fim do envio e estatisticas - Modo Transmissor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{rec1.png}
+\caption{Informações iniciais - Modo Recetor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{rec2.png}
+\caption{Inicio do envio e barra de progresso - Modo Recetor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.65]{rec1.png}
+\caption{Fim do envio e estatisticas - Modo Recetor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{prints} à medida que o ficheiro ia sendo enviado, sendo também possível verificar quando houvesse \textit{timeouts} ou envio/receção de REJ's. 
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 

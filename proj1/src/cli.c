@@ -188,9 +188,9 @@ int chooseTimeout() {
     int choice = -1;
 
     scanf("%d", &choice);
-    
+
     if (choice == 0) choice = 3;
-    
+
     flushIn();
 
     if (choice >= 1 && choice <= 60) {
@@ -235,15 +235,15 @@ void showInitialInfo(linkLayer * ll, applicationLayer * al) {
   char modeW[] = "Transmitter\0";
   char modeR[] = "Receiver\0";
   int s = -1;
-  
+
   if ((*al).status == 'W') {
     s = 0;
   } else {
     s = 1;
   }
-  
+
   if (s == 0) {
-  
+
   printf("\n\n\n"
     "************************************\n"
     "********* RCOM project - 1 *********\n"
@@ -291,10 +291,10 @@ const int PROGRESS_BAR_LENGTH = 51;
 
 void printProgressBar(int current, int total) {
   float percentage = 100.0 * current / (float) total;
-  
+
   if (percentage > 100.0)
     percentage = 100.0;
-  
+
   printf("\rCompleted: %6.2f%% [", percentage);
   int i;
   int len = PROGRESS_BAR_LENGTH;
@@ -306,10 +306,10 @@ void printProgressBar(int current, int total) {
 }
 
 void printStats(applicationLayer * al, Statistics * stats){
-  
+
 	int numReceivedRR;
 	int numReceivedREJ;
-    
+
 	if ((*al).status == 'W') {
     printf("\n"
     "                                    \n"
@@ -319,9 +319,9 @@ void printStats(applicationLayer * al, Statistics * stats){
     "       Sent Messages: %d\n"
     "         Received RR: %d\n"
     "        Received REJ: %d\n\n"
-    
+
     "                  Total Timeouts: %d\n\n"
-    
+
     "************************************\n"
     "\n", stats->sentMessages, stats->numReceivedRR, stats->numReceivedREJ, stats->timeouts);
 	} else {
@@ -336,7 +336,25 @@ void printStats(applicationLayer * al, Statistics * stats){
     "************************************\n"
     "\n", stats->receivedMessages, stats->numSentRR, stats->numSentREJ);
 	}
-  
+
 
   return;
+}
+
+void chooseFileName(char ** fileName) {
+	clearScreen();
+
+	printf("\n\n\n"
+	  "********************************************************\n"
+	  "******************* RCOM project - 1 *******************\n"
+	  "********************************************************\n"
+	  "**                                                    **\n"
+	  "**        Type the name of the file to send:          **\n"
+	  "**                                                    **\n"
+	  "             Name is: ");
+
+	  *fileName = getLine();
+
+	  printf("\n\n");
+	return;
 }
