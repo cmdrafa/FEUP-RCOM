@@ -1,8 +1,6 @@
 \documentclass[11pt]{article}
 
 
-%use the english line for english reports
-%usepackage[english]{babel}
 \usepackage[portuguese]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{indentfirst}
@@ -12,6 +10,7 @@
 \usepackage{listings}
 \usepackage{color}
 \usepackage{xcolor}
+\usepackage[left=1in,right=1in,top=1in,bottom=.8in]{geometry}
 
 %%%%%%%%%%% CONFIGURATION OF CODE INPUT %%%%%%%%%%%%%%%%%%%%%%
 \lstset{
@@ -149,10 +148,10 @@ A \textbf{camada de aplicação}, que vai depender da camada de ligação lógic
 \subsection{\textit{Interface}}
 
 A interface na linha de comandos está implementada nos ficheiros \textit{cli.c} e \textit{cli.h} que têm as funções que vão permitir a escolha de valores de alguns parâmetros referentes à transferência do ficheiro, existindo limites impostos de acordo com o guião. 
-Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o transmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os parâmetros com a escolha feita pelo utilizador. 
+Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o transmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os parâmetros com a escolha feita pelo utilizador. \linebreak
 
 
-\newpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Estrutura do código}
 
@@ -182,7 +181,6 @@ Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate},
 \lstinputlisting{./code/struct2.c}
 \normalsize
 
-\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Casos de uso principais}
 
@@ -267,6 +265,7 @@ A primeira função a ser implementada em \textit{applicationLayer} foi a funç�
 \section{Validação}
 
 Para verificar se a transferência do ficheiro \textit{pinguim.gif} foi efetuada com sucesso decidimos colocar uma verificação de inicio e fim de envio,  durante o envio do ficheiro adicionamos uma barra de progresso que iria sendo actualizada à medida que os packets iam sendo enviados. 
+
 \begin{figure}[h!]
 \begin{center}
 \includegraphics[scale=0.6]{trans1.png}
@@ -315,7 +314,7 @@ Para verificar se a transferência do ficheiro \textit{pinguim.gif} foi efetuada
 \end{center}
 \end{figure}
 
-Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{prints} à medida que o ficheiro ia sendo enviado, sendo também possível verificar quando houvesse \textit{timeouts} ou envio/receção de REJ's. 
+\par Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{prints} à medida que o ficheiro ia sendo enviado, sendo também possível verificar quando houvesse \textit{timeouts} ou envio/receção de REJ's. 
 
 
 
@@ -326,7 +325,20 @@ Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{p
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{ Elementos de valorização}
-  (identificação dos elementos de valorização implementados; descrição da estratégia de implementação com apresentação de pequenos extratos de código) 
+
+\textbf{Selecção de parâmetros pelo utilizador}
+\par Ao executar o programa irá inicializar uma interface onde o utilizador vai escolher se será o transmissor ou o recetor, qual a porta de série que irá usar, \textit{baud rate}, tamanho máximo do campo de informação de tramas I, número máximo de retransmissões e intervalo de \textit{timeout}.\newline
+
+\textbf{Implementação de REJ}
+\small
+\lstset{basicstyle=\ttfamily \color{black}\tiny, title=Envio de REJ aquando do erro do tipo BCC2}
+\lstinputlisting{./code/rej.c}
+\normalsize
+
+\textbf{Verificação da integridade dos dados pela Aplicação}
+\par O programa verifica o tamanho do ficheiro recebido.\newline
+\par\textbf{Registo de Ocorrências}
+\par É registado na \textit{struct} de estatisticas o número de tramas I (re)transmitidas/recebidas, número de ocorrências de \textit{timeouts} e número de REJ enviados/recebidos.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -334,7 +346,11 @@ Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{p
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusões}
- (síntese da informação apresentada nas secções anteriores; reflexão sobre os objectivos de aprendizagem alcançados)
+Achamos que o objetivo principal para este projecto foi alcançado com sucesso. Durante os primeiros dias não conseguiamos interpretar bem o guião de trabalho fornecido, mas em conjunto com outros grupos tiramos as dúvidas existentes e a partir daí todos os pontos do guião foram bem compreendidos. 
+
+Podemos dizer que terminamos com um trabalho bem organizado, em duas camadas, como foi pedido em que a \textit{applicationLayer} vai depender da \textit{linkLayer}. Recorremos ao uso de alarmes 
+
+A realização deste projecto ajudou-nos a entender melhor os conceitos desta unidade curricular e a aprofunda conhecimentos no que toca a comunicação em redes a partir do uso de portas de série. 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -344,6 +360,7 @@ Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{p
 \section{Anexos}
 \small
 
+\lstset{   basicstyle = \ttfamily \color{black} \footnotesize }
 
 \lstset{  title=Anexo 1 - applicationLayer.h}
 \lstinputlisting{../src/applicationLayer.h}
