@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
 	showInitialInfo(ll, al);
 
 	printf("\n####  Attempting connection...   ####\n");
-	if (ll_open(flag, stop, count, al, ll, &oldtio) < 0) {
+	if (ll_open(flag, stop, count, ll, &oldtio) < 0) {
 		printf("\nError in ll_open\n");
 		return -1;
 	}
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
 	printStats(al, ll->stat);
 
 	printf("\n\n####  Terminating connection...   ####\n");
-	if(ll_close(flag, stop, count, al, ll, &oldtio) < 0) {
+	if(ll_close(flag, stop, count, ll, &oldtio) < 0) {
 		printf("\nError in ll_close\n");
 		return -1;
 	}
@@ -178,6 +178,8 @@ void fillLinkLayer() {
 	(*ll).numTransmissions = ATTEMPTS;
 	(*ll).packSize = MAX_PACKET_SIZE + 6;
 	(*al).debug = FALSE;
+
+	(*ll).status = (*al).status;
 
 	(*ll).stat = malloc(sizeof(Statistics));
 	initStat((*ll).stat);
@@ -220,7 +222,7 @@ int sendFile() {
 	if ((*al).debug == TRUE) {
 	printf("\n_________________________________________________\nFirst Control Packet");
 	}
-	llwrite(stop, al, ll, packet_1, packetSize);
+	llwrite(stop, ll, packet_1, packetSize);
 
 	int packetCounter = 0;
 	int numberOfPackets = fileSize / (((*ll).packSize - 6) - 4);
@@ -250,7 +252,7 @@ int sendFile() {
 		if ((*al).debug == TRUE) {
 		printf("\nPacket size is: %d\n", i);
 		}
-		if (llwrite(stop, al, ll, infoPacket, i) < 0)
+		if (llwrite(stop, ll, infoPacket, i) < 0)
 		{
 		 printf("\nError in llwrite\n");
 		 free(packet_1);
@@ -276,7 +278,7 @@ int sendFile() {
 	if ((*al).debug == TRUE) {
 	printf("\n_________________________________________________\nLast Control Packet");
 	}
-	llwrite(stop, al, ll, packet_1, packetSize);
+	llwrite(stop, ll, packet_1, packetSize);
 
 	free(packet_1);
 	free(fullFileStart);
@@ -300,7 +302,7 @@ int readFile() {
 		printf("\n__________________________________________________________________\nPacket Received\n");
 		}
 		while (sizeOfPacket < 0) {
-			sizeOfPacket = llread(al, ll, &packet_1);
+			sizeOfPacket = llread( ll, &packet_1);
 			if (sizeOfPacket < 0)
 				free(packet_1);
 		}
