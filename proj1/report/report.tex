@@ -8,7 +8,9 @@
 \usepackage{indentfirst}
 \usepackage{graphicx}
 \usepackage{verbatim}
-
+\usepackage{textcomp}
+\usepackage{listings}
+\usepackage{color}
 
 
 \begin{document}
@@ -130,7 +132,63 @@ Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate},
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Estrutura do código}
 
- (APIs, principais estruturas de dados, principais funções e sua relação com a arquitetura)
+\subsection{Application Layer}
+ 
+  A camada da aplicação está implementada nos ficheiro \textit{applicationLayer.c} e \textit{applicationLayer.h} e é representada por uma estrutura na qual se encontram um \textit{char} que representa o modo do programa (Receptor/Transmissor) e um inteiro chamado debug que permite fazer o \textit{debugging} através de prints ao longo do código.
+ 
+\small
+\lstset{frame=tb,
+  language={[Visual]Basic},
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+\lstinputlisting{./code/struct1.c}
+\normalsize
+
+\subsection{Link Layer}
+ 
+ É nos ficheiros \textit{linkLayer.c}, \textit{linkLayer.h} e \textit{linkLayerAux.h} que está implementada a camada de ligação de dados representada por uma estrutura na qual se encontram:
+
+\begin{itemize}
+  \item A porta de série;
+   \item O Baud Rate;
+   \item O número de sequência;
+   \item O timeout;
+   \item O número de tentativas;
+   \item O tamanho máximo de cada pacote;
+   \item Estrutura de estatísticas.
+\end{itemize}
+
+\small
+\lstset{frame=tb,
+  language={[Visual]Basic},
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true
+  tabsize=3
+}
+\lstinputlisting{./code/struct2.c}
+\normalsize
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
