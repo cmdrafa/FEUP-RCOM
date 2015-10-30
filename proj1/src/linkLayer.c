@@ -5,8 +5,8 @@ int * countPointer;
 int * timeoutAlarm;
 
 //*********************** Function to send the message **************************
-void writeMsg(applicationLayer * al, char aFlag, char cFlag) {
-	tcflush((*al).fd, TCOFLUSH); // Clean output buffer
+void writeMsg(int * fd, char aFlag, char cFlag) {
+	tcflush(*fd, TCOFLUSH); // Clean output buffer
 
 	//******* Setting the flags to send **********
 	unsigned char SET[SETLEN];
@@ -17,12 +17,12 @@ void writeMsg(applicationLayer * al, char aFlag, char cFlag) {
 	SET[4] = FLAG;
 	//********************************************
 
-	write(al->fd, SET, SETLEN); //Sending the info
+	write(*fd, SET, SETLEN); //Sending the info
 }
 //*******************************************************************************
 
 //************** Read the response of the receiver ******************************
-int readResponse(applicationLayer * al, int * flag, char aFlag, char cFlag) {
+int readResponse(int * fd, int * flag, char aFlag, char cFlag) {
 
 	int res;
 	char response[5];
@@ -32,7 +32,7 @@ int readResponse(applicationLayer * al, int * flag, char aFlag, char cFlag) {
 	unsigned int stateMachine = 0;
 	while (stateMachine < 5) { // state machine control
 		char readChar;
-		res = read((*al).fd,&readChar,1); // returns after 1 char input
+		res = read(*fd,&readChar,1); // returns after 1 char input
 
 		if (!*flag && (res == 1)) {
 			switch (stateMachine) {
@@ -81,10 +81,6 @@ int readResponse(applicationLayer * al, int * flag, char aFlag, char cFlag) {
 				switch(readChar) {
 					case FLAG:
 					response[stateMachine] = readChar;
-					if ((*al).debug == TRUE) {
-					  printf("\nCorrect response read: ");
-					  printf("\n                              0x%x, 0x%x, 0x%x, 0x%x, 0x%x.", response[0], response[1], response[2], response[3], response[4]);
-					}
 					stateMachine = 5;
 					break;
 					default:
@@ -107,18 +103,18 @@ int readResponse(applicationLayer * al, int * flag, char aFlag, char cFlag) {
 }
 
 //************** Read the response of the receiver ******************************
-int readInfo(applicationLayer * al, int * flag, char * buffer) {
+int readInfo(int * fd, int * flag, char * buffer) {
 
 	int res;
 	int end = FALSE;
 	char * bufferP = buffer;
 	int c = 0;
 
-	tcflush((*al).fd, TCIFLUSH);
+	tcflush(*fd, TCIFLUSH);
 	//************* While that controls the reading of the response of the receiver *********
 	while (end == FALSE) { // state machine control
 		char readChar;
-		res = read((*al).fd,&readChar,1); // returns after 1 char input
+		res = read(*fd,&readChar,1); // returns after 1 char input
 
 		if (!*flag && (res == 1)) {
 
@@ -144,29 +140,29 @@ int readInfo(applicationLayer * al, int * flag, char * buffer) {
 }
 
 //************** Function to configure the port and store the old configurations **************
-void configure(applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
+void configure(linkLayer * ll, struct termios * oldtio) {
 
 	//Initialized variable to set the new config to the port
 	struct termios newtio;
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\nConfiguration started!");
 	}
 
 	//Open the serial port
-	al->fd = open((*ll).port, O_RDWR | O_NOCTTY | O_NONBLOCK );
+	ll->fd = open((*ll).port, O_RDWR | O_NOCTTY | O_NONBLOCK );
 
 	//Check for errors of opening the port
-	if (al->fd <0) {
+	if (ll->fd <0) {
 		perror((*ll).port);
 		exit(-1);
 	}
 
-	if ( tcgetattr(al->fd,oldtio) == -1) { // save current port settings
+	if ( tcgetattr(ll->fd,oldtio) == -1) { // save current port settings
 		perror("tcgetattr");
 		exit(-1);
 	}
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\nOld config saved...");
 	}
 
@@ -180,39 +176,35 @@ void configure(applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
 	newtio.c_cc[VTIME] = 0.1;
 	newtio.c_cc[VMIN] = 1; // blocking read until 1 chars received
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\nSaving new config! ");
 	}
 
-	if ( tcsetattr(al->fd,TCSANOW,&newtio) == -1)
+	if ( tcsetattr(ll->fd,TCSANOW,&newtio) == -1)
 	{
 		perror("tcsetattr");
 		exit(-1);
 	}
 	//***************************************************************
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\nConfiguration set");
 	}
 }
 //*********************************************************************************************
 
 //************* Reset the serial port configuration *****************
-void resetConfiguration(applicationLayer * al, struct termios * oldtio) {
-	
-      if ((*al).debug == TRUE) {
-	printf("\nRestoring default config");
-      }
+void resetConfiguration(int * fd, struct termios * oldtio) {
 
 	//Sleep before reseting the configuration to prevent errors in communication
 	sleep(1);
-	if ( tcsetattr((*al).fd,TCSANOW,oldtio) == -1)
+	if ( tcsetattr(*fd,TCSANOW,oldtio) == -1)
 	{
 		perror("tcsetattr");
 		exit(-1);
 	}
 
-	close((*al).fd);
+	close(*fd);
 }
 //*******************************************************************
 
@@ -221,31 +213,33 @@ void triggerAlarm() {
 	*flagPointer = TRUE;
 	*countPointer = *countPointer + 1;
 	*timeoutAlarm = *timeoutAlarm + 1;
-	
+
 	  //printf("\nTimeout Expired");
-	
+
 }
 //************************************************
 
-int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
+int ll_open(int * flag, int * stop, int * count, linkLayer * ll, struct termios * oldtio) {
 
-	if ((*al).debug == TRUE) {
+	ll->debug = FALSE;
+
+	if (ll->debug == TRUE) {
 	  printf("\n----------------------------------------------------\nStarted ll_open()");
 	}
 
-	configure(al, ll, oldtio);
+	configure(ll, oldtio);
 
 	flagPointer = flag;
 	countPointer = count;
 	timeoutAlarm = &(ll->stat->timeouts);
 
 	//*********** While cycle to control the sending of the message **************
-	if ((*al).status == 'W') {
-		if ((*al).debug == TRUE) {
+	if (ll->status == 'W') {
+		if (ll->debug == TRUE) {
 		  printf("\nThis is the sender...");
 		}
 
-		tcflush((*al).fd, TCIFLUSH);
+		tcflush(ll->fd, TCIFLUSH);
 		while(*count < (*ll).numTransmissions) {
 
 			if(&flag) {
@@ -253,16 +247,16 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 
 				//printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
 
-				tcflush((*al).fd, TCOFLUSH);
+				tcflush(ll->fd, TCOFLUSH);
 
-				writeMsg(al, A_1, C_SET);
-				tcflush((*al).fd, TCIFLUSH);
+				writeMsg(&(ll->fd), A_1, C_SET);
+				tcflush(ll->fd, TCIFLUSH);
 				*flag = FALSE;
-				if ((*al).debug == TRUE) {
+				if (ll->debug == TRUE) {
 				  printf("\nwaiting...");
 				}
-				if(readResponse(al, flag, A_1, C_UA) == 0) {
-					if ((*al).debug == TRUE) {
+				if(readResponse(&(ll->fd), flag, A_1, C_UA) == 0) {
+					if (ll->debug == TRUE) {
 					  printf("\n-> Response received!");
 					}
 					break;
@@ -273,25 +267,25 @@ int ll_open(int * flag, int * stop, int * count, applicationLayer * al, linkLaye
 		if (*count == (*ll).numTransmissions)
 			return -1;
 	}
-	else if ((*al).status == 'R') {
-		if ((*al).debug == TRUE) {
+	else if (ll->status == 'R') {
+		if (ll->debug == TRUE) {
 		  printf("\nThis is the receiver");
 		}
 		int flagT = FALSE;
-		tcflush((*al).fd, TCIFLUSH);
-		while (readResponse(al, &flagT, A_1, C_SET) != 0) { continue; }
-		writeMsg(al, A_1, C_UA);
+		tcflush(ll->fd, TCIFLUSH);
+		while (readResponse(&ll->fd, &flagT, A_1, C_SET) != 0) { continue; }
+		writeMsg(&ll->fd, A_1, C_UA);
 	}
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\n----------------------------------------------------\nFinished ll_open()");
 	}
 	return 0;
 }
 
-int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLayer * ll, struct termios * oldtio) {
+int ll_close(int * flag, int * stop, int * count, linkLayer * ll, struct termios * oldtio) {
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\n----------------------------------------------------\nStarted ll_close()");
 	}
 
@@ -301,26 +295,26 @@ int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLay
 	*flagPointer = FALSE;
 
 	//*********** While cycle to control the sending of the message **************
-	if ((*al).status == 'W') {
-		if ((*al).debug == TRUE) {
+	if (ll->status == 'W') {
+		if (ll->debug == TRUE) {
 		  printf("\nWill send DISC...");
 		}
 
-		tcflush((*al).fd, TCIFLUSH);
+		tcflush(ll->fd, TCIFLUSH);
 		while(*count < (*ll).numTransmissions) {
 
 			if(&flag) {
 				alarm((*ll).timeout);
 
 				//printf("\nAttempts remaining: %d ", (ATTEMPTS - *count - 1));
-				writeMsg(al, A_1, C_DISC);
-				tcflush((*al).fd, TCIFLUSH);
+				writeMsg(&ll->fd, A_1, C_DISC);
+				tcflush(ll->fd, TCIFLUSH);
 				*flag = FALSE;
-				if ((*al).debug == TRUE) {
+				if (ll->debug == TRUE) {
 				  printf("\nwaiting...");
 				}
-				if(readResponse(al, flag, A_2, C_DISC) == 0) {
-					if ((*al).debug == TRUE) {
+				if(readResponse(&ll->fd, flag, A_2, C_DISC) == 0) {
+					if (ll->debug == TRUE) {
 					  printf("\n-> Response received!");
 					}
 					break;
@@ -330,54 +324,54 @@ int ll_close(int * flag, int * stop, int * count, applicationLayer * al, linkLay
 		if (*count == (*ll).numTransmissions)
 			return -1;
 
-		if ((*al).debug == TRUE) {
+		if (ll->debug == TRUE) {
 		  printf("\nSending last message (C_UA)");
 		}
-		writeMsg(al, A_2, C_UA);
+		writeMsg(&ll->fd, A_2, C_UA);
 		//****************************************************************************
 	}
-	else if ((*al).status == 'R') {
-		if ((*al).debug == TRUE) {
+	else if (ll->status == 'R') {
+		if (ll->debug == TRUE) {
 		  printf("\nWill receive DISC and respond the same\n");
 		}
 		int flagT = FALSE;
-		tcflush((*al).fd, TCIFLUSH);
-		while (readResponse(al, &flagT, A_1, C_DISC) != 0) { continue; }
-		writeMsg(al, A_2, C_DISC);
-		while (readResponse(al, &flagT, A_2, C_UA) != 0) { continue; }
+		tcflush(ll->fd, TCIFLUSH);
+		while (readResponse(&(ll->fd), &flagT, A_1, C_DISC) != 0) { continue; }
+		writeMsg(&(ll->fd), A_2, C_DISC);
+		while (readResponse(&(ll->fd), &flagT, A_2, C_UA) != 0) { continue; }
 	}
 
-	resetConfiguration(al, oldtio);
+	resetConfiguration(&ll->fd, oldtio);
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\n----------------------------------------------------\nFinished ll_close()");
 	}
 }
 
-int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
+int llread(linkLayer * ll, char ** buffer) {
 	int flagT = FALSE;
 
 	char * buffer_2 = malloc(sizeof(char) * ((((*ll).packSize - 6) * 2) + 16));
 
 	int nRead = -1;
 	while (nRead < 0) {
-		nRead = readInfo(al, &flagT, buffer_2);
+		nRead = readInfo(&ll->fd, &flagT, buffer_2);
 	}
 
 	int sizeOfInfoRead = deStuff(buffer_2, buffer, ll);
 
 	if (*(*buffer + 2) == C_0) {
-		if ((*al).debug == TRUE) {
+		if (ll->debug == TRUE) {
 		  printf("\nSequence number received was: 0");
 		}
 	}
 	else if (*(*buffer + 2) == C_1) {
-		if ((*al).debug == TRUE) {
+		if (ll->debug == TRUE) {
 		  printf("\nSequence number received was: 1");
 		}
 	}
-	
-	if ((*al).debug == TRUE) {
+
+	if (ll->debug == TRUE) {
 	  printf(" | Sequence number asked was: %d", (*ll).sequenceNumber);
 
 	  printf("\nA: 0x%x", *(*buffer + 1));
@@ -385,7 +379,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	  printf("\nBcc1: 0x%x", *(*buffer + 3));
 	  printf("\nBcc2: 0x%x", *(*buffer + sizeOfInfoRead - 2));
 	}
-	
+
 	int length = sizeOfInfoRead - 6;
 	int q = 4;
 	char bcc2 = 0x0;
@@ -394,49 +388,49 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	  q++;
 	}
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\nBcc2-2: 0x%x", bcc2);
 	}
 
 	if ((*(*buffer + 3) != (*(*buffer + 1) ^ *(*buffer + 2))) || (*(*buffer + sizeOfInfoRead - 2) != bcc2)) {
 		if ((*ll).sequenceNumber == 0) {
 
-			if ((*al).debug == TRUE) {
+			if (ll->debug == TRUE) {
 			  printf("\n****\n2nd ERROR receiving 1, wanted 0, sending REJ 0\n****");
 			}
 			ll->stat->numSentREJ++;
-			writeMsg(al, A_1, C_REJ_0);
+			writeMsg(&(ll->fd), A_1, C_REJ_0);
 			free(buffer_2);
 			return -5;
 		} else if ((*ll).sequenceNumber == 1) {
-			if ((*al).debug == TRUE) {
+			if (ll->debug == TRUE) {
 			  printf("\n****\n2nd ERROR receiving 0, wanted 1, sending REJ 1\n****");
 			}
 			ll->stat->numSentREJ++;
-			writeMsg(al, A_1, C_REJ_1);
+			writeMsg(&(ll->fd), A_1, C_REJ_1);
 			free(buffer_2);
 			return -4;
 		}
 	}
 	else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_0) {
-		writeMsg(al, A_1, C_RR_1);
+		writeMsg(&(ll->fd), A_1, C_RR_1);
 		ll->stat->numSentRR++;
 		(*ll).sequenceNumber = 1;
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_1) {
-		writeMsg(al, A_1, C_RR_0);
+		writeMsg(&(ll->fd), A_1, C_RR_0);
 		ll->stat->numSentRR++;
 		(*ll).sequenceNumber = 0;
 	} else if ((*ll).sequenceNumber == 0 && *(*buffer + 2) == C_1) {
-		writeMsg(al, A_1, C_REJ_0);
-		if ((*al).debug == TRUE) {
+		writeMsg(&(ll->fd), A_1, C_REJ_0);
+		if (ll->debug == TRUE) {
 		  printf("\n****\nERROR receiving 1, wanted 0, sending REJ 0\n****");
 		}
 		ll->stat->numSentREJ++;
 		free(buffer_2);
 		return -2;
 	} else if ((*ll).sequenceNumber == 1 && *(*buffer + 2) == C_0) {
-		writeMsg(al, A_1, C_REJ_1);
-		if ((*al).debug == TRUE) {
+		writeMsg(&(ll->fd), A_1, C_REJ_1);
+		if (ll->debug == TRUE) {
 		  printf("\n****\nERROR receiving 0, wanted 1, sending REJ 1\n****");
 		}
 		ll->stat->numSentREJ++;
@@ -451,7 +445,7 @@ int llread(applicationLayer * al, linkLayer * ll, char ** buffer) {
 	return sizeOfInfoRead;
 }
 
-int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, int length) {
+int llwrite(int * stop, linkLayer * ll, char * buffer, int length) {
 
 	//Fill the toSend char array
 	char * toSend = malloc(sizeof(char) * (length + 6));
@@ -483,7 +477,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 
 	*(toSend + length + 5) = FLAG;
 
-	if ((*al).debug == TRUE) {
+	if (ll->debug == TRUE) {
 	  printf("\nA: 0x%x", *(toSend + 1));
 	  printf("\nC: 0x%x", *(toSend + 2));
 	  printf("\nBcc1: 0x%x", *(toSend + 3));
@@ -500,22 +494,22 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 	//*********** While cycle to control the sending of the message **************
 	int rr = FALSE;
 	while(*countPointer < (*ll).numTransmissions && rr == FALSE) {
-		if ((*al).debug == TRUE) {
+		if (ll->debug == TRUE) {
 		  printf("\nSending Packet with seqNum: 0x%x", *(toSendStuffed + 2));
 		}
 		if(&flagPointer) {
 			alarm((*ll).timeout);
 			//printf("\nAttempts remaining: %d ", (ATTEMPTS - *countPointer - 1));
 
-			tcflush((*al).fd, TCOFLUSH);
-			write(al->fd, toSendStuffed, bufSize); //Sending the info
+			tcflush(ll->fd, TCOFLUSH);
+			write(ll->fd, toSendStuffed, bufSize); //Sending the info
 			//*******************************************
 
 			*flagPointer = FALSE;
-			int resp = readSenderResponse(al, ll);
+			int resp = readSenderResponse(ll);
 			if(resp == 0) {
 				(*ll).sequenceNumber = 0;
-				if ((*al).debug == TRUE) {
+				if (ll->debug == TRUE) {
 				  printf("\n-> Received RR | Receiver asking for packet 0");
 				}
 				ll->stat->numReceivedRR++;
@@ -523,35 +517,35 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 			}
 			else if(resp == 1) {
 				(*ll).sequenceNumber = 1;
-				if ((*al).debug == TRUE) {
+				if (ll->debug == TRUE) {
 				  printf("\n-> Received RR | Receiver asking for packet 1");
 				}
 				ll->stat->numReceivedRR++;
 				rr = TRUE;
 			}
 			else if (resp == -2) {
-				if ((*al).debug == TRUE) {
+				if (ll->debug == TRUE) {
 				  printf("\n-> Received REJ | Receiver asking for packet 0");
 				}
 				ll->stat->numReceivedREJ++;
 			}
 			else if (resp == -3) {
-				if ((*al).debug == TRUE) {
+				if (ll->debug == TRUE) {
 				  printf("\n-> Received REJ | Receiver asking for packet 1");
 				}
 				ll->stat->numReceivedREJ++;
 			} else {
-			  if ((*al).debug == TRUE) {
+			  if (ll->debug == TRUE) {
 			    printf("\nTIMEOUT - did not read response");
 			  }
 			}
-			if ((*al).debug == TRUE) {
+			if (ll->debug == TRUE) {
 			  printf("\n");
 			}
 			usleep(0.5 * 1000000);
 			//*******************************************
 		} else {
-			if ((*al).debug == TRUE) {
+			if (ll->debug == TRUE) {
 			  printf("\nTIMEOUT expired");
 			}
 		}
@@ -568,7 +562,7 @@ int llwrite(int * stop, applicationLayer * al, linkLayer * ll, char * buffer, in
 }
 
 //************** Read the response of the receiver ******************************
-int readSenderResponse(applicationLayer * al, linkLayer * ll) {
+int readSenderResponse(linkLayer * ll) {
 
 	int res;
 	char response[5];
@@ -577,7 +571,7 @@ int readSenderResponse(applicationLayer * al, linkLayer * ll) {
 	unsigned int stateMachine = 0;
 	while (stateMachine < 5) { // state machine control
 		char readChar;
-		res = read((*al).fd,&readChar,1); // returns after 1 char input
+		res = read(ll->fd,&readChar,1); // returns after 1 char input
 
 		if (!*flagPointer && (res == 1)) {
 			switch (stateMachine) {
@@ -693,7 +687,7 @@ char * stuff(char ** deStuffed, int deStuffedLength, int * bufSize) {
 }
 
 int deStuff(char * deStuffed, char ** stuffed, linkLayer * ll) {
-        
+
 	char * temp = malloc(sizeof(char) * ((((*ll).packSize - 6) * 2) + 16));
 
 	int stuffedC = 0;
@@ -731,7 +725,7 @@ int deStuff(char * deStuffed, char ** stuffed, linkLayer * ll) {
 		i++;
 	}
 	free(temp);
-	
+
 	return stuffedC;
 }
 
