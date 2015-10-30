@@ -11,11 +11,35 @@
 \usepackage{textcomp}
 \usepackage{listings}
 \usepackage{color}
+\usepackage{xcolor}
 
+%%%%%%%%%%% CONFIGURATION OF CODE INPUT %%%%%%%%%%%%%%%%%%%%%%
+\lstset{
+  language=C,
+  tabsize=4,
+  captionpos=b,
+  numbers=left,
+  frame=single,
+  breaklines=true,
+  rulecolor=\color{black},
+  title=Struct linkLayer,
+  commentstyle=\color{green},
+  backgroundcolor=\color{codeBackground},
+  numberstyle=\color{gray},
+  keywordstyle=\color{blue} \textbf,%otherkeywords={xdata},
+  keywords=[2]{xdata},
+  keywordstyle=[2]\color{red}\textbf,
+  identifierstyle=\color{black},
+  stringstyle=\color{red}\ttfamily,
+  basicstyle = \ttfamily \color{black} \footnotesize,
+  showstringspaces=false ,
+  moredelim=[is][\color{yellow}]{|}{|},
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
-
+\definecolor{codeBackground}{RGB}{220, 220, 220}
 \setlength{\textwidth}{16cm}
 \setlength{\textheight}{22cm}
 
@@ -137,7 +161,6 @@ Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate},
   A camada da aplicação está implementada nos ficheiro \textit{applicationLayer.c} e \textit{applicationLayer.h} e é representada por uma estrutura na qual se encontram um \textit{char} que representa o modo do programa (Receptor/Transmissor) e um inteiro chamado debug que permite fazer o \textit{debugging} através de prints ao longo do código.
  
 \small
-\lstset{frame=tb,  language={C},  aboveskip=3mm,  belowskip=3mm,  showstringspaces=false,  columns=flexible,  basicstyle={\small\ttfamily},  numbers=none,  numberstyle=\tiny\color{purple},  keywordstyle=\color{blue},  commentstyle=\color{dkgreen},  stringstyle=\color{mauve},  breaklines=true,  breakatwhitespace=true  tabsize=5}
 \lstinputlisting{./code/struct1.c}
 \normalsize
 
@@ -156,7 +179,6 @@ Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate},
 \end{itemize}
 
 \small
-\lstset{frame=tb,  language={C},  aboveskip=3mm,  belowskip=3mm,  showstringspaces=false,  columns=flexible,  basicstyle={\small\ttfamily},  numbers=none,  numberstyle=\tiny\color{purple},  keywordstyle=\color{blue},  commentstyle=\color{dkgreen},  stringstyle=\color{mauve},  breaklines=true,  breakatwhitespace=true  tabsize=5}
 \lstinputlisting{./code/struct2.c}
 \normalsize
 
