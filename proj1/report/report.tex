@@ -87,16 +87,15 @@ Marta Lopes - 201208067 \\
 \section{Sumário}
 
 Este relatório tem como objetivo explicar o primeiro projeto, realizado para esta unidade curricular, denominado "Protocolo de Ligação de Dados". Este projeto consiste no envio de informação de um computador para outro, através do uso de porta de série. Foram assim implementados programas para ler e escrever a informação a ser enviada.
-\par O projeto foi finalizado com sucesso, sendo que os dados foram enviados e recebidos de forma correcta. Foram também incluidos a prevenção e correção de erros ao longo da transmissão, restabelecendo a trasmissão quando os erros acontecem.
+\par O projeto foi finalizado com sucesso, sendo que os dados foram enviados e recebidos de forma correcta. Foram também incluídos a prevenção e correção de erros ao longo da transmissão, restabelecendo a transmissão quando os erros acontecem.
 
-\newpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introdução}
 
-O principal objetivo deste trabalho, que foi realizado ao longo das aulas laboratoriais de Redes de Computadores, consiste em implementar um protocolo de  ligação de dados, de acordo com a especificação descrita no guião, e também testar o protocolo com uma aplicação simples de transferência de ficheiros, igualmente especificada. 
+Iremos então descrever o nosso trabalho, que consiste em implementar um protocolo de  ligação de dados, de acordo com a especificação descrita no guião, de uma forma mais teórica e pormenorizada para assim poderem ser avaliados certos aspectos que não seriam possíveis avaliar durante a apresentação na aula. 
 O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a linguagem de programação foi C e as portas de série existentes realizavam comunicação assíncrona. 
-\par O protocolo de  ligação de dados pretende assim fornecer um serviço de comunicação de dados fiável entre dois sistemas ligados por um cabo de série. As funções utilizadas serão a de criação e sincronismo de tramas que irão organizar os dados a ser enviados (\textit{framing}), a do estabelecimento/conclusão da ligação, a numeração de tramas, o controlo de fluxo, a confirmação de envio sem erros e o controlo dos erros que poderão ser criados por \textit{time-outs}, tramas fora da sequência esperada ou retransmissões. 
-\par Sendo assim, este relatório servirá para descrever o nosso trabalho de uma forma mais teórica para assim poderem ser avaliados certos pormenores que não seriam possíveis de avaliar na apresentação do projeto.
+\par O protocolo de  ligação de dados pretende assim fornecer um serviço de comunicação de dados fiável entre dois sistemas ligados por um cabo de série. As funções utilizadas serão a de criação e sincronismo de tramas que irão organizar os dados a ser enviados (\textit{framing}), a do estabelecimento/conclusão da ligação, a numeração de tramas, o controlo de fluxo, a confirmação de envio sem erros e o controlo dos erros que poderão ser criados por \textit{timeouts}, tramas fora da sequência esperada ou retransmissões. 
 \par O nosso relatório terá então as \textbf{secções principais} seguintes:
 
 \begin{itemize}
@@ -110,8 +109,6 @@ O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a lingua
 \end{itemize}
 
 
- 
-\newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Arquitetura}
 
@@ -126,7 +123,7 @@ A \textbf{camada de aplicação}, que vai depender da camada de ligação lógic
 \subsection{\textit{Interface}}
 
 A interface na linha de comandos está implementada nos ficheiros \textit{cli.c} e \textit{cli.h} que têm as funções que vão permitir a escolha de valores de alguns parâmetros referentes à transferência do ficheiro, existindo limites impostos de acordo com o guião. 
-Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o trasmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os paramêtros com a escolha feita pelo utilizador. 
+Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o transmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os parâmetros com a escolha feita pelo utilizador. 
 
 
 \newpage
@@ -152,7 +149,7 @@ O protocolo de ligação lógica está implementado na camada \textit{linkLayer}
 \subsection{Principais aspectos funcionais}
 \begin{itemize}
   \item Configurar a porta de série como é pretendido;
-  \item Repôr a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
+  \item Repor a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
   \item  Estabelecer a ligação de dados utilizando a porta de série;
   \item  Enviar comandos;
   \item  Enviar/receber mensagens;
@@ -165,12 +162,12 @@ O protocolo de ligação lógica está implementado na camada \textit{linkLayer}
  \subsubsection{ll\_open}
 
 	Esta função é responsável por configurar a porta de série com as opções pretendidas (utilizando, por exemplo, o \textit{baudRate} escolhido pelo utilizador) e por guardar numa variável que passa por argumento à função \textit{configure}.
-	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida terimina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
+	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida termina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
    	
   \subsubsection{ll\_close}
    
     Do lado do receptor, esta função começa por aguardar a recepção do comando DISC, respondendo com o mesmo comando. Após o envio deste comando, e imediatamente antes de reestabelecer as configurações originais da porta de série aguarda a recepção do comando UA por parte do emissor.
-	Do lado do emissor, esta função começa por eviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
+	Do lado do emissor, esta função começa por enviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
     Termina por fazer \textit{resetConfiguration}, função na qual é feito um \textit{sleep} de um segundo por forma a garantir que as configurações originais da porta de série não são restabelecidas antes de que toda a informação tenha sido passada.
    
  \subsubsection{llwrite}
@@ -242,7 +239,60 @@ O protocolo de aplicação está implementado na camada applicationLayer, camada
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Validação}
 
- (descrição dos testes efectuados com apresentação quantificada dos resultados, se possível)
+Para verificar se a transferência do ficheiro \textit{pinguim.gif} foi efetuada com sucesso decidimos colocar uma verificação de inicio e fim de envio,  durante o envio do ficheiro adicionamos uma barra de progresso que iria sendo actualizada à medida que os packets iam sendo enviados. 
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{trans1.png}
+\caption{Informações iniciais - Modo Transmissor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{trans2.png}
+\caption{Inicio do envio e barra de progresso - Modo Transmissor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{trans3.png}
+\caption{Fim do envio e estatisticas - Modo Transmissor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{rec1.png}
+\caption{Informações iniciais - Modo Recetor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.6]{rec2.png}
+\caption{Inicio do envio e barra de progresso - Modo Recetor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.65]{rec1.png}
+\caption{Fim do envio e estatisticas - Modo Recetor}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
+
+Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{prints} à medida que o ficheiro ia sendo enviado, sendo também possível verificar quando houvesse \textit{timeouts} ou envio/receção de REJ's. 
+
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
