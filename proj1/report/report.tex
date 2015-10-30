@@ -10,6 +10,7 @@
 \usepackage{verbatim}
 
 
+
 \begin{document}
 
 
@@ -114,7 +115,19 @@ O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a lingua
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Arquitetura}
 
- (blocos funcionais e interfaces)
+\subsection{\textit{Application Layer} e \textit{Link Layer}}
+
+O projeto está organizado em duas \textit{layers} que vão ser responsáveis pela correta funcionalidade do mesmo. A \textit{layer} que vai servir para a aplicação tem os ficheiros \textit{applicationLayer.c} e \textit{applicationLayer.h} e a ligação lógica está representada nos ficheiros \textit{linkLayer.c} e \textit{linkLayer.h} com um ficheiro *.h auxiliar, o \textit{linkLayerAux.h}.\newline
+
+A \textbf{camada de ligação lógica}, contém várias funções, servindo estas para a configuração e abertura da porta de série, o envio de comandos, envio e receção de mensagens e para a realização dos processos de \textit{stuffing} e \textit{destuffing}.\newline
+
+A \textbf{camada de aplicação}, que vai depender da camada de ligação lógica utilizando algumas das suas funções, disponibilizará funções onde serão especificados o envio e receção de pacotes de dados, o envio e receção de pacotes de controlo e finalmente a leitura e a escrita do ficheiro a enviar. 
+
+\subsection{\textit{Interface}}
+
+A interface na linha de comandos está implementada nos ficheiros \textit{cli.c} e \textit{cli.h} que têm as funções que vão permitir a escolha de valores de alguns parâmetros referentes à transferência do ficheiro, existindo limites impostos de acordo com o guião. 
+Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate}, o tamanho máximo para a mensagem, o número de \textit{timeouts} máximo no caso de falha de comunicação e a duração de cada \textit{timeout}. Além disso, o utilizador terá também de dizer se será o trasmissor ou o recetor e qual é a sua porta de série. Depois de o utilizador especificar cada um destes valores a aplicação vai iniciar, sendo que terá uma informação inicial mostrando os paramêtros com a escolha feita pelo utilizador. 
+
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -135,10 +148,8 @@ O ambiente de desenvolvimento utilizado foi em PC's com \textit{Linux}, a lingua
 \section{Protocolo de ligação lógica}
 
 O protocolo de ligação lógica está implementado na camada \textit{linkLayer}, camada da qual depende a camada \textit{applicationLayer}.
-\begin{center}
-\line(1,0){250}
-\end{center}
-\textbf{Principais aspectos funcionais:}
+
+\subsection{Principais aspectos funcionais}
 \begin{itemize}
   \item Configurar a porta de série como é pretendido;
   \item Repôr a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
@@ -148,23 +159,21 @@ O protocolo de ligação lógica está implementado na camada \textit{linkLayer}
   \item Processo de \textit{Stuffing} e \textit{Destuffing} dos \textit{packets} recebidos da camada \textit{applicationLayer}.
 \end{itemize}
 
-\begin{center}
-\line(1,0){250}
-\end{center}
-\textbf{Funções implementadas na \textit{linkLayer}:}
-  \begin{enumerate}
-  \item\textbf{llopen}
+
+\subsection{Funções implementadas na \textit{linkLayer}}
+  
+ \subsubsection{ll\_open}
 
 	Esta função é responsável por configurar a porta de série com as opções pretendidas (utilizando, por exemplo, o \textit{baudRate} escolhido pelo utilizador) e por guardar numa variável que passa por argumento à função \textit{configure}.
 	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida terimina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
    	
-  \item\textbf{llclose}
+  \subsubsection{ll\_close}
    
     Do lado do receptor, esta função começa por aguardar a recepção do comando DISC, respondendo com o mesmo comando. Após o envio deste comando, e imediatamente antes de reestabelecer as configurações originais da porta de série aguarda a recepção do comando UA por parte do emissor.
 	Do lado do emissor, esta função começa por eviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
     Termina por fazer \textit{resetConfiguration}, função na qual é feito um \textit{sleep} de um segundo por forma a garantir que as configurações originais da porta de série não são restabelecidas antes de que toda a informação tenha sido passada.
    
-\item\textbf{llwrite}
+ \subsubsection{llwrite}
     
 	Esta função começa por alocar memória num \textit{buffer} no qual a informação será organizada (antes do processo de \textit{stuffing}). Após alocar a memória necessária começa por atribuir os valores de FLAG, A, C e BCC de acordo com o número de sequência da trama. A partir de BCC é copiada para o buffer toda a informação recebida por argumento desta função da \textit{applicationLayer} correspondente ao \textit{packet} a enviar. Antes de terminar o preenchimento do \textit{buffer} coloca o BCC2 ('ou' exclusivo dos octetos do \textit{packet}) e a FLAG para terminar.
 	Depois de ter a trama preenchida e antes de começar o processo de envio, envia o \textit{buffer} para a função \textit{stuff} que retorna um \textit{buffer} com a trama pronta para envio.
@@ -172,19 +181,59 @@ O protocolo de ligação lógica está implementado na camada \textit{linkLayer}
 	A mesma trama pode ser re-enviada por ocorrência de \textit{timeout}, o que também é controlado nesta função através da implementação de alarmes.
 	Esta função pode também terminar pela ocorrência de \textit{timeouts} maior do que o número máximo definido previamente pelo utilizador.
 	
- \item  \textbf{llread}
+ \subsubsection{llread}
    
     A função \textit{llread} começa por alocar memória para o \textit{buffer} que vai ser recebido, entrando imediatamente a seguir num ciclo do ual apenas sai quando algo é lido da porta de série.
 	Após a leitura o \textit{buffer} lido é passado para a função responsável pelo processo de \textit{destuffing} que retorna a trama de Informação recebida "descodificada". 
 	Os valores de BCC e de BCC2 são verificados por forma a garantir que a trama foi recebida sem erros, caso o tenha sido é interpretado o número de sequência e se tudo for o pretendido é enviado o comando RR, caso contrário é enviado o comando REJ, pedindo que a mesma seja enviada novamente.
-\end{enumerate}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Protocolo de aplicação}
- (identificação dos principais aspectos funcionais; descrição da estratégia de implementação destes aspectos com apresentação de extractos de código)
+
+O protocolo de aplicação está implementado na camada applicationLayer, camada esta que depende, como dito anteriormente, da camada linkLayer.
+
+ \subsection{Principais aspectos funcionais}
+ \begin{itemize}
+  \item Envio e recepção de pacotes de dados;
+  \item Envio e recepção de pacotes de controlo;
+  \item Leitura do ficheiro a enviar;
+  \item Escrita do ficheiro a enviar.
+\end{itemize}
+  
+  \subsection{Funções implementadas na \textit{applicationLayer}}
+	\textbf{main}
+    
+	Chama as diversas funções da \textit{Interface} do utilizador e recebe o seu \textit{input} por forma a inicializar o programa com as configurações desejadas pelo utilizador. Chama as funções \textit{ll\_open, ll\_close}, \textit{readFile} e \textit{sendFile}.\newline
+	
+   \textbf{initStat}
+   
+    Função responsável por inicializar os valores da estrutura de estatística. Esta estrutura é utilizada para que, no final da execução do programa, o utilizador esteja a par do que aconteceu no desenrolar do programa.\newline
+	
+  \textbf{fillLinkLayer}
+   
+    Função responsável por inicializar a estrutura\textit{ linkLayer}, estrutura essa passada para muitas das funções utilizadas ao longo do programa. Nesta estrutura estão atributos como por exemplo: \textit{baudRate, timeout}, etc.\newline
+	
+   \textbf{createFirstControlPacket}
+   
+    Função responsável por gerar o primeiro pacote de controlo. É colocado neste pacote o tamanho do ficheiro a enviar bem como o nome do mesmo.\newline
+	
+    \textbf{getNameAndSizeOfFile}
+   
+    Esta função é responsável por, dado o primeiro pacote de controlo recebido, interpretar qual o nome e tamanho do ficheiro a receber.\newline
+	
+   \textbf{sendFile}
+   
+    Esta função começa por ler toda a informação do ficheiro a enviar e guarda-a num \textit{buffer} de chars, \textit{buffer} a partir do qual a informação será lida para envio. Após a leitura chama a função responsável pelo envio do primeiro pacote de controlo e envia-o para o recetor chamando \textit{llwrite} (função do pacote de ligação). Depois do envio do primeiro pacote de controlo é calculado o número de pacotes necessários a enviar tendo em conta o tamanho máximo definido previamente pelo utilizador, e entra num ciclo que é percorrido o número de vezes igual ao número de pacotes de dados. Neste ciclo é, inicialmente criado o pacote de dados, com a informação necessária (C, número de sequência, número de octetos do campo de dados) e com os dados em si. É chamada a função \textit{llwrite} para enviar o pacote e repete-se o ciclo até ao final do envio dos dados (atualizando sempre a barra de progresso no ecrã).\newline
+   
+    \textbf{readFile}
+   
+    Esta é a função responsável pela recepção de todo o ficheiro e pela sua escrita em disco. Começa por entrar num ciclo que termina quando o último pacote de controlo é lido. Dentro do ciclo o primeiro passo é chamar a função \textit{llread }que retorna, após a leitura, o pacote a interpretar.
+	São então tomadas medidas diferentes nos casos de ser o primeiro pacote de controlo, o último pacote de controlo ou um pacote de dados. No caso de ser o primeiro pacote de controlo é guardada a informação do nome e tamanho do ficheiro. No caso de ser o último pacote de controlo é criado o ficheiro e toda a informação lida, até agora guardada num\textit{ buffer}, é escrita em disco. No caso de ser um pacote de dados a informação é adicionada no final do \textit{buffer} de leitura.
+	Sempre que um pacote é lido é atualizada a barra de progresso.\newline
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
