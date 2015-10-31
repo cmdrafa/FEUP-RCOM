@@ -51,7 +51,7 @@
 \Large{Redes de Computadores}
 }
 
-\author{\textbf{Grupo xx:}\\
+\author{\textbf{Grupo 03:}\\
 Francisco Rodrigues - 201305627l\\
 João Nogueira - 201303882 \\
 Marta Lopes - 201208067 \\
@@ -201,42 +201,28 @@ Na imagem abaixo estão os casos de uso principais por ordem de execução do pr
 O protocolo de ligação lógica está implementado na camada \textit{linkLayer}, camada da qual depende a camada \textit{applicationLayer}.
 
 \subsection{Principais aspectos funcionais}
+\small
 \begin{itemize}
+\setlength\itemsep{0em}
   \item Configurar a porta de série como é pretendido;
-  \item Repor a configuração da porta de série como originalmente após a transferência dos dados pretendidos;
+  \item Repor a configuração da porta de série como originalmente após a transferência dos dados;
   \item  Estabelecer a ligação de dados utilizando a porta de série;
-  \item  Enviar comandos;
-  \item  Enviar/receber mensagens;
+  \item  Enviar comandos e  enviar/receber mensagens;
   \item Processo de \textit{Stuffing} e \textit{Destuffing} dos \textit{packets} recebidos da camada \textit{applicationLayer}.
 \end{itemize}
+\normalsize
 
 
 \subsection{Funções implementadas na \textit{linkLayer}}
-  
- \subsubsection{ll\_open}
 
-	Esta função é responsável por configurar a porta de série com as opções pretendidas (utilizando, por exemplo, o \textit{baudRate} escolhido pelo utilizador) e por guardar numa variável que passa por argumento à função \textit{configure}.
-	Depois de configurar a porta de série, do lado do emissor envia o comando SET e aguarda a resposta UA do recetor que, ao ser recebida termina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a recepção do comando SET e, ao recebê-lo responde com o comando UA.
-   	
-  \subsubsection{ll\_close}
+ \subsubsection{ll\_open e ll\_close} 
+
+  A função \textbf{ll\_open} vai fazer a configuração da porta de série com as opções pretendidas e depois da configuração ser feita, do lado do emissor envia o comando SET e aguarda a rsposta UA do recetor que, ao ser recebida, termina a função. Utiliza o alarme para controlar os \textit{timeouts}. Do lado do recetor aguarda a receção do comando SET e, ao recebê-lo, responde com o comando UA. A função \textbf{ll\_close} do lado do recetor, começa por aguardar a receção do comando DISC, respondendo com o mesmo comando. Após o envio deste e antes de reestabelecer as configurações originais da porta de série, aguarda a receção do comando UA por parte do emissor. Do lado do emissor esta função começa por enviar o comando DISC e aguarda a resposta com o mesmo comando. Após a receção de DISC envia o comando UA. Termina ao fazer \textit{resetConfiguration}, função na qual é feito um \textit{sleep} para garantir que as configurações originais não são reestabelecidas antes que a informação tenha sido passada.
    
-    Do lado do receptor, esta função começa por aguardar a recepção do comando DISC, respondendo com o mesmo comando. Após o envio deste comando, e imediatamente antes de reestabelecer as configurações originais da porta de série aguarda a recepção do comando UA por parte do emissor.
-	Do lado do emissor, esta função começa por enviar o comando DISC e aguarda pela resposta com o mesmo comando por parte do receptor (implementando o alarme para manter controlo dos timeouts). Após a correta recepção de DISC evia o último comando do programa, comando UA.
-    Termina por fazer \textit{resetConfiguration}, função na qual é feito um \textit{sleep} de um segundo por forma a garantir que as configurações originais da porta de série não são restabelecidas antes de que toda a informação tenha sido passada.
-   
- \subsubsection{llwrite}
+ \subsubsection{llwrite e llread}
     
-	Esta função começa por alocar memória num \textit{buffer} no qual a informação será organizada (antes do processo de \textit{stuffing}). Após alocar a memória necessária começa por atribuir os valores de FLAG, A, C e BCC de acordo com o número de sequência da trama. A partir de BCC é copiada para o buffer toda a informação recebida por argumento desta função da \textit{applicationLayer} correspondente ao \textit{packet} a enviar. Antes de terminar o preenchimento do \textit{buffer} coloca o BCC2 ('ou' exclusivo dos octetos do \textit{packet}) e a FLAG para terminar.
-	Depois de ter a trama preenchida e antes de começar o processo de envio, envia o \textit{buffer} para a função \textit{stuff} que retorna um \textit{buffer} com a trama pronta para envio.
-	Envia a trama através da porta de série e aguarda a resposta por parte do recetor, o que vai determinar o caminho a seguir pela função, que pode variar entre terminar a função pois houve a recepção de RR, ou re-enviar a mesma trama por ter sido rejeitada.
-	A mesma trama pode ser re-enviada por ocorrência de \textit{timeout}, o que também é controlado nesta função através da implementação de alarmes.
-	Esta função pode também terminar pela ocorrência de \textit{timeouts} maior do que o número máximo definido previamente pelo utilizador.
-	
- \subsubsection{llread}
-   
-    A função \textit{llread} começa por alocar memória para o \textit{buffer} que vai ser recebido, entrando imediatamente a seguir num ciclo do ual apenas sai quando algo é lido da porta de série.
-	Após a leitura o \textit{buffer} lido é passado para a função responsável pelo processo de \textit{destuffing} que retorna a trama de Informação recebida "descodificada". 
-	Os valores de BCC e de BCC2 são verificados por forma a garantir que a trama foi recebida sem erros, caso o tenha sido é interpretado o número de sequência e se tudo for o pretendido é enviado o comando RR, caso contrário é enviado o comando REJ, pedindo que a mesma seja enviada novamente.
+    A função \textbf{llwrite} vai começar por alocar memória num \textit{buffer}, organizando a informação antes do processo de \textit{stuffing}. Após a alocação começa por atribuir os valores de FLAG, A, C e BCC de acordo com o número de sequência da trama. A partir de BCC, vai ser copiada para o \textit{buffer} toda a informação recebida por argumento correspondente ao \textit{packet} a enviar. Antes de terminar o preenchimento do \textit{buffer} coloca o BCC2 e a FLAG para terminar. Depois da trama ser preenchida e antes de começar o envio, é enviado o \textit{buffer} para a função \textit{stuff} que retorna um \textit{buffer} com a trama pronta para envio. A trama é então enviada através da porta de série, aguardando a resposta por parte do recetor, o que vai determinar o caminho a seguir pela função, que pode terminar a função pois houve receção de RR ou re-enviar a mesma trama por ter sido rejeitada. A mesma trama também pode ser re-enviada por ocorrência de \textit{timeouts} ou terminar pela ocorrência de demasiados \textit{timeouts}. A função \textbf{llread} também vai começar por alocar memória para o \textit{buffer} que vai ser recebido, entrando num ciclo do qual apenas sai quando algo é lido da porta de série. Após a leitura, o \textit{buffer} lido é passado para o \textit{destuffing} que descodifica a trama de informação. Os valores de BCC e de BCC2 são verificados para garantir que a trama seja recebida sem erros, caso o tenha sido é interpretado o número de sequência e se estiver correcto é enviado o comando RR, caso contrário é enviado o comando REJ, pedindo que a mesma seja reenviada.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -273,51 +259,9 @@ A primeira função a ser implementada em \textit{applicationLayer} foi a funç�
 Para verificar se a transferência do ficheiro \textit{pinguim.gif} foi efetuada com sucesso decidimos colocar uma verificação de inicio e fim de envio,  durante o envio do ficheiro adicionamos uma barra de progresso que iria sendo actualizada à medida que os packets iam sendo enviados. 
 
 \begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.6]{trans1.png}
-\caption{Informações iniciais - Modo Transmissor}
+\hspace*{-1.2cm}\includegraphics[scale=0.95]{transrec.png}
+\caption{Inicio e conclusão do envio do ficheiro - Transmitter e Receiver}
 \label{fig:codigoFigura}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.6]{trans2.png}
-\caption{Inicio do envio e barra de progresso - Modo Transmissor}
-\label{fig:codigoFigura}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.6]{trans3.png}
-\caption{Fim do envio e estatisticas - Modo Transmissor}
-\label{fig:codigoFigura}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.6]{rec1.png}
-\caption{Informações iniciais - Modo Recetor}
-\label{fig:codigoFigura}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.6]{rec2.png}
-\caption{Inicio do envio e barra de progresso - Modo Recetor}
-\label{fig:codigoFigura}
-\end{center}
-\end{figure}
-
-\begin{figure}[h!]
-\begin{center}
-\includegraphics[scale=0.65]{rec1.png}
-\caption{Fim do envio e estatisticas - Modo Recetor}
-\label{fig:codigoFigura}
-\end{center}
 \end{figure}
 
 \par Adicionamos também o modo \textit{debug} em que iriam ser feitos mais \textit{prints} à medida que o ficheiro ia sendo enviado, sendo também possível verificar quando houvesse \textit{timeouts} ou envio/receção de REJ's. 
@@ -354,7 +298,7 @@ Para verificar se a transferência do ficheiro \textit{pinguim.gif} foi efetuada
 \section{Conclusões}
 Achamos que o objetivo principal para este projecto foi alcançado com sucesso. Durante os primeiros dias não conseguiamos interpretar bem o guião de trabalho fornecido, mas em conjunto com outros grupos tiramos as dúvidas existentes e a partir daí todos os pontos do guião foram bem compreendidos. 
 
-Podemos dizer que terminamos com um trabalho bem organizado, em duas camadas, como foi pedido em que a \textit{applicationLayer} vai depender da \textit{linkLayer}. Recorremos ao uso de alarmes 
+No que diz respeito ao trabalho realizado, serviu para que todos os elementos do grupo realmente compreendessem o funcionamento da independência entre as camadas. Como foi anteriormente abordado neste mesmo relatório existe uma independência nítida entre a camada da aplicação e a camada de ligação de dados. A camada da aplicação depende da de ligação de dados, o que ao contrário não se verifica.
 
 A realização deste projecto ajudou-nos a entender melhor os conceitos desta unidade curricular e a aprofunda conhecimentos no que toca a comunicação em redes a partir do uso de portas de série. 
 
