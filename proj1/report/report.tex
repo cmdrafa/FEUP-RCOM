@@ -183,8 +183,14 @@ Os parâmetros a serem especificados pelo utilizador serão a \textit{baudrate},
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Casos de uso principais}
-
- (identificação; sequências de chamada de funções)
+ 
+Na imagem abaixo estão os casos de uso principais por ordem de execução do programa.
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.43]{useCases.png}
+\label{fig:codigoFigura}
+\end{center}
+\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -362,17 +368,29 @@ A realização deste projecto ajudou-nos a entender melhor os conceitos desta un
 
 \lstset{   basicstyle = \ttfamily \color{black} \footnotesize }
 
+\subsection{Headers}
+
+\subsubsection{applicationLayer.h}
+
 \lstset{  title=Anexo 1 - applicationLayer.h}
 \lstinputlisting{../src/applicationLayer.h}
+\newpage
+\subsubsection{linkLayer.h}
 
 \lstset{  title=Anexo 2 - linkLayer.h}
 \lstinputlisting{../src/linkLayer.h}
+\newpage
+\subsubsection{linkLayerAux.h}
 
 \lstset{  title=Anexo 3 - linkLayerAux.h}
 \lstinputlisting{../src/linkLayerAux.h}
+\newpage
+\subsubsection{utilities.h}
 
 \lstset{  title=Anexo 4 - utilities.h}
 \lstinputlisting{../src/utilities.h}
+\newpage
+\subsubsection{cli.h}
 
 \lstset{  title=Anexo 5 - cli.h}
 \lstinputlisting{../src/cli.h}
@@ -398,15 +416,25 @@ A realização deste projecto ajudou-nos a entender melhor os conceitos desta un
   basicstyle = \ttfamily \color{black} \footnotesize,
   showstringspaces=false ,
 }
+\newpage
+\subsection{*.c files}
+
+\subsubsection{applicationLayer.c}
 
 \lstset{  title=Anexo 6 - applicationLayer.c}
 \lstinputlisting{../src/applicationLayer.c}
+\newpage
+\subsubsection{linkLayer.c}
 
 \lstset{  title=Anexo 7 - linkLayer.c}
 \lstinputlisting{../src/linkLayer.c}
+\newpage
+\subsubsection{utilities.c}
 
 \lstset{  title=Anexo 8 - utilities.c}
 \lstinputlisting{../src/utilities.c}
+\newpage
+\subsubsection{cli.c}
 
 \lstset{  title=Anexo 9 - cli.c}
 \lstinputlisting{../src/cli.c}

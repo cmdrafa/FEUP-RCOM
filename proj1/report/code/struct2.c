@@ -6,9 +6,7 @@ typedef struct {
   unsigned int timeout;
   unsigned int numTransmissions;
   int packSize;
-
   char status;
   int debug;
-
   Statistics * stat;
 } linkLayer;
