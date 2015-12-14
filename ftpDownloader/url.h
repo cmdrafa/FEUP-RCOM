@@ -5,6 +5,7 @@ typedef struct{
 	char * password;
 	struct hostent * h;
 	char * urlPath;
+	char * hostIp;
 }urlStruct;
 
 void getUrlInfo(char * completeString, urlStruct * url);
