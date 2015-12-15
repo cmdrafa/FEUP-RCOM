@@ -19,6 +19,16 @@
 #define CMD_PASS 1
 #define CMD_PASSV 2
 
+
+typedef struct{
+	char * user;
+	char * password;
+	struct hostent * h;
+	char * urlPath;
+	char * hostIp;
+}urlStruct;
+
 void debug(char * msg1, char * msg);
 void msg(char * m);
 void stringMsg(char * m, char * m2);
+void getName(char * url, char ** filename);

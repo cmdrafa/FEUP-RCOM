@@ -13,3 +13,16 @@ void msg(char * m) {
 void stringMsg(char * m, char * m2) {
 	printf("PROGRAM: %s: %s\n", m, m2);
 }
+
+void getName(char * url, char ** filename) {
+	char * temp = url;
+	int i = 0;
+	while(temp != NULL) {
+		if(i > 0)
+			*filename = temp + 1;
+		else
+			*filename = temp;
+		temp = strchr(*filename, '/');
+		i++;
+	}
+}
