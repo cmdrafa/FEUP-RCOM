@@ -36,6 +36,7 @@ int startConection(urlStruct * url, FTP * ftp) {
 
 	ftp->socketFd = socket_fd;
 
+	msg("Connected");
 	debug("#################### DEBUG START CONNECTION ####################", "END");
 
 	return 0;
@@ -44,7 +45,7 @@ int startConection(urlStruct * url, FTP * ftp) {
 int showResponse(FTP * ftp) {
 	char answerFromServer[MAX_STRING_DEBUG_SIZE] = "";	
 	if(read(ftp->socketFd, answerFromServer, MAX_STRING_DEBUG_SIZE) > 0) {
-		stringMsg("Server response", answerFromServer);
+		responseMsg("Server response", answerFromServer);
 		return 0;
 	}
 	msg("Could not read response form server");
@@ -54,7 +55,7 @@ int showResponse(FTP * ftp) {
 int receivePassvAnswer(FTP * ftp) {
 	char passvAnswer[MAX_STRING_DEBUG_SIZE];	
 	if(read(ftp->socketFd, passvAnswer, MAX_STRING_DEBUG_SIZE) > 0) {
-		stringMsg("Server response", passvAnswer);
+		responseMsg("Server response", passvAnswer);
 		if(6 != sscanf(passvAnswer, "%*[^(](%d,%d,%d,%d,%d,%d)\n", &(ftp->passvAnswer[0]), &(ftp->passvAnswer[1]), &(ftp->passvAnswer[2]), &(ftp->passvAnswer[3]), &(ftp->passvAnswer[4]), &(ftp->passvAnswer[5])))
 		{
 			stringMsg("Could not read the 6 bytes from the server response", passvAnswer);
@@ -184,6 +185,7 @@ int startReceiverConection(urlStruct * url, FTP * ftp) {
 
 	ftp->socketFd = socket_fd;
 	ftp->dataSocketFd = socket_fd;
+	msg("Connected to receiver");
 	debug("#################### DEBUG START RECEIVER CONECTION ####################", "END");
 
 	return 0;
@@ -191,7 +193,7 @@ int startReceiverConection(urlStruct * url, FTP * ftp) {
 
 int receiveFile(urlStruct * url, FTP * ftp, FTP * receiverFtp) {
 	debug("#################### DEBUG RECEIVE FILE ####################", "BEGIN");
-   
+   	msg("Receiving File...");
 	char cmd[MAX_STRING_DEBUG_SIZE] = "";
 	strcpy(cmd, "retr ");
 	strcat(cmd, url->urlPath);
@@ -235,6 +237,7 @@ int receiveFile(urlStruct * url, FTP * ftp, FTP * receiverFtp) {
 
 	fclose(file);
 
+	msg("File received");
 	debug("#################### DEBUG RECEIVE FILE ####################", "END");
 
 	return 0;

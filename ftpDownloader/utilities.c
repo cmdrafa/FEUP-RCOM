@@ -26,3 +26,7 @@ void getName(char * url, char ** filename) {
 		i++;
 	}
 }
+
+void responseMsg(char * m, char * m2) {
+	printf("PROGRAM: %s\n%sRESPONSE END\n", m, m2);
+}

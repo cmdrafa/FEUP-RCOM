@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 #define MAX_STRING_DEBUG_SIZE 100
 #define PORT_FTP 21
 
@@ -32,3 +32,4 @@ void debug(char * msg1, char * msg);
 void msg(char * m);
 void stringMsg(char * m, char * m2);
 void getName(char * url, char ** filename);
+void responseMsg(char * m, char * m2);
