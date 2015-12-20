@@ -70,12 +70,20 @@
 
 	\newpage
 
-	\section{Introdução}
+	\section{Sumário}
 	\normalsize
 
 Este relatório tem como objetivo explicar o segundo projeto da Unidade Curricular de Redes de Computadores bem como analisar os resultados obtidos na realização das experiências especificadas no enunciado do mesmo.
 
-Este projeto encontra-se dividido em duas grandes partes. Em primeiro lugar, é-nos pedido que desenvolvamos uma aplicação de \textit{download} que proceda à transferência de um ficheiro e que implemente o protocolo \textit{FTP}. Em segundo lugar, é-nos pedido que configuremos e estudemos uma Rede de Computadores seguindo a estrutura das experiências abaixo enumeradas:
+	\newpage
+
+	\tableofcontents	
+
+	\newpage
+
+	\section{Introdução}
+
+	Este projeto encontra-se dividido em duas grandes partes. Em primeiro lugar, é-nos pedido que desenvolvamos uma aplicação de \textit{download} que proceda à transferência de um ficheiro e que implemente o protocolo \textit{FTP}. Em segundo lugar, é-nos pedido que configuremos e estudemos uma Rede de Computadores seguindo a estrutura das experiências abaixo enumeradas:
 
 \begin{enumerate}
 
@@ -87,12 +95,6 @@ Este projeto encontra-se dividido em duas grandes partes. Em primeiro lugar, é-
 \item Conexões \textit{TCP}.
 
 \end{enumerate}
-
-	\newpage
-
-	\tableofcontents	
-
-	\newpage
 
 	\section{Parte 1 - Aplicação de download}
 
@@ -110,134 +112,105 @@ Este projeto encontra-se dividido em duas grandes partes. Em primeiro lugar, é-
 
 	A \textit{UrlStruct} é a estrutura definida respponsável por guardar a informação necessária que depende do \textit{input} do utilizador.
 
-	\lstset{basicstyle=\ttfamily \color{black}\small, title=urlStruct}
+	\lstset{basicstyle=\ttfamily \color{black}\tiny, title=urlStruct}
 	\lstinputlisting{./res/res1.c}
 	\normalsize
 
 	Ao correr o programa é chamada a função \textit{getUrlInfo} que é responsável por pegar na \textit{string} que o utilizador forneceu como argumento e interpretar toda a informação necessária.
 
-	\lstset{basicstyle=\ttfamily \color{black}\small, title=Url Header}
+	\lstset{basicstyle=\ttfamily \color{black}\tiny, title=Url Header}
 	\lstinputlisting{../ftpDownloader/url.h}
 	\normalsize
 
-	\newpage
+	Depois de interpretar a informação introduzida pelo utilizador, e após verificar que esta informação é válida é chamada a função \textit{startConection} responsável por ligar o cliente \textit{FTP} ao servidor através de um \textit{socket}. Com a ligação estabelecida é então necessário chamar função \textit{getControl}, responsável por enviar a informação necessária para o \textit{login} e por enviar o comando \textbf{\textit{PASV}}, o que vai permitir que haja comunicação em ambos os sentidos.
 
-	\section{O Jogo - Q!nto}
-	\subsection{História}
-	
-	“Q!nto” é um jogo de tabuleiro recente, criado no ano de 2014 no qual podem participar entre 2 e 4 jogadores. Foi criado por Gene Mackles e lançado pela PDG games
-	
-	Este jogo faz parte de uma coleção de três jogos chamada Triple Play que é uma coleção de jogos de tabuleiro.
+	\lstset{basicstyle=\ttfamily \color{black}\tiny, title=getControl}
+	\lstinputlisting{./res/res2.c}
+	\normalsize
 
-	\subsection{Conteúdo do Jogo}
-	
-	Estão incluídas no Jogo 60 cartas divididas como mostra a figura à direita.
-	
-	\subsection{Regras de Jogo}
-	
-	Existem três versões para jogar o Q!into, sendo elas o
-	\textit{Classic},
-	\textit{Plus} e
-	\textit{Light}. Neste projeto usaremos apenas a versão Light que passamos a explicar a seguir:
-	
-	Inicialmente cada jogador retira uma carta do baralho para escolher quem começa a jogar. O jogo começa dividindo igualmente o baralho pelos jogadores presentes.
-	
-	As cartas que cada jogador recebeu serão a pilha de cartas com que ele vai poder jogar. Estas ficarão viradas para baixo e cada jogador retira da pilha de cartas que lhe foi atribuída as primeiras 5. 
-	
-	\textbf{Noção base:} Uma linha são 2, 3, 4 ou 5 cartas numa linha ou coluna na qual as cartas têm a mesma côr ou cores diferentes e na qual as cartas têm a mesma forma ou formas diferentes. Uma linha com 5 cartas é um Q!nto.
-	O primeiro jogador começa o jogo. A seguir joga o jogador à sua esquerda. Quando na vez de um jogador, este pode fazer uma de três coisas:
-	
-	\begin{enumerate}
-	\item 		Adicionar 1, 2, 3, 4 ou 5 peças à grelha numa única linha reta e depois retirar do topo da sua pilha de cartas o número necesário para voltar a ficar com 5 na mão*.
-	Se, numa das jogadas, o jogador completar um ou mais Q!ntos, este deve voltar a completar a sua mão* e deve jogar outra vez.
-	\item		Trocar uma ou mais cartas da sua mão por wildcards já jogadas e/ou a carta Q!nto de forma a que as cartas trocadas continuem a funcionar naquela posição.
-	\item		Passar a vez... e trocar algumas, todas ou nenhuma das susas cartas colocando-as no fundo da sua pilha e retirando do topo o número de cartas necessário para voltar a ficar com 5*.
-	\end{enumerate}
-	
-	\small
-	*ou menos, se não houver cartas suficientes para perfazer 5.
+	 É também feita uma nova conexão através da função \textit{startReceiverConection} para permitir a receção do ficheiro. pedido pelo utilizador. Por fim é enviado o comando \textbf{\textit{RETR}} e recebido o ficheiro a ser guardado. A função \textit{receiveFile} é responsável por enviar o comando, receber o ficheiro e escrevê-lo no disco.
+
+	Terminada a receção do ficheiro resta apenas fechar os \textit{sockets} abertos e libertar a memória alocada para terminar o programa.
+
+	As funções acima referidas e outras auxiliares estão definifdas abaixo, bem como nos anexos.
+
+	\lstset{basicstyle=\ttfamily \color{black}\tiny, title=conection.h}
+	\lstinputlisting{../ftpDownloader/conection.h}
 	\normalsize
 	
-	\bigskip
-	
-	O jogo termina quando houver 1 jogador que fica sem cartas, sendo este o vencedor.\newline
-	
-	\small
-	\noindent
-	Nota: Uma carta “wild” ou “Q!nto” pode representar cartas diferentes em diferentes direções. No caso de representar coisas diferentes e não ter na mão uma carta que também as consiga representar, então, essa carta é insubstituível.
+	Durante o desenvolvimento da aplicação foi implementado um modo de \textit{debug} que é ativo ao alterar a Macro \textit{DEBUG} de 0 para 1. Este modo faz com que haja mais impressões na consola, o que permite controlar com maior exatidão o modo como a aplicação está a funcionar.
+
+	\lstset{basicstyle=\ttfamily \color{black}\tiny, title=Macros}
+	\lstinputlisting{./res/res3.c}
 	\normalsize
-	\newpage
 
-	\section{Lógica de Jogo}
-	\subsection{Representação do estado de jogo}
+	\subsection{Resultados}
 
-	Embora não haja tabuleiro neste jogo, existe sempre a necessidade de saber a posição relativa entre as cartas que estão em jogo. Como tal, implementamos um tabuleiro na forma de lista de listas de cartas que funciona de forma dinâmica, ou seja, sempre que é introduzida uma nova carta é feita a verificação aos quatro lados do tabuleiro e adicionada uma linha/coluna se assim for necessário, por forma a garantir que existem sempre casas nas bordas do tabuleiro que estão livres para que o jogador as possa utilizar.
-	
-O estado do jogo não é apenas representado pelo tabuleiro. A cada jogada é apresentada no ecrã a mão de que o jogador dispõe para jogar. Como sabemos ele apenas tem acesso a cinco das cartas do seu baralho, e durante a sua jogada não lhe são dadas mais cartas para além daquelas cinco.
-	
-	\subsection{Visualização do Tabuleiro}
+	Esta aplicação foi testada com diversos ficheiros, tanto em modo anónimo como em modo não anónimo. A transferência dos vários ficheiros foi verificada tendo sido o máximo ficheiro testado um ficheiro de vídeo com cerca de 200MB.
 
-	Sendo o tabuleiro uma lista de listas de tamanho variável, os predicados responsáveis pela visualização do tabuleiro de jogo terminam quando a cauda da lista é uma lista vazia nas chamadas recursivas como mostrado abaixo.
+	Em caso de erro, para além da aplicação terminar é impresso na consola o erro em causa, de modo a que o utilizador tenha o máximo controlo possível sobre o sucedido.
 
-	Alguns dos predicados utilizados não estão mostrados acima, como por exemplo o predicado responsável pela impressão dos índices das linhas, no entanto estes estão incluídos no código fonte em anexo a este relatório.
-
-	\subsection{Execução de Jogadas}
-
-	No início de cada jogada é perguntado ao jogador que tipo de jogada pretende executar. Como sabemos acima o jogador pode optar por adicionar cartas, trocar cartas já presentes no tabuleiro ou trocar cartas que tem na mão.
-
-	\subsubsection{Adicionar Cartas}
-
-	Depois de optar por adicionar cartas no tabuleiro, é mostrado no ecrã o estado atual do tabuleiro e as cartas que o jogador tem na mão. O jogador opta pelas cartas que quer jogar bem como a casa do tabuleiro onde pretende que as cartas sejam colocadas. Depois de introduzir esses dados é feita a verificação das condições que têm de ser cumpridas:
-
-	\begin{itemize}
-		\item 	Verifica se a casa está vazia;
-		\item Verifica se tem pelo menos uma carta nas casas adjacentes (excepto no caso de ser a primeira jogada);
-		\item Verifica se, com a carta colocada, a linha fica com menos de seis cartas;
-		\item Verifica também se as regras relacionadas com as cores e naipes se verificam na linha;
-		\item Verifica se, com a carta colocada, a coluna fica com menos de seis cartas;
-		\item Verifica também se as regras relacionadas com as cores e naipes se verificam na coluna.
-	\end{itemize}
-
-	Acima encontra-se parte do predicado responsável pelas verificações mencionadas que garantem que todas as regras são cumpridas.
-
-	\subsubsection{Trocar Cartas}
-
-	Depois de optar por alterar cartas presentes no tabuleiro, tal como no caso acima, é mostrado no ecrã o estado atual do tabuleiro bem como as cartas de que o jogador dispõe. Depois de optar pelas cartas e casas nas quais querem jogar são feitas as seguintes verificações:
-
-	\begin{itemize}
-		\item Verifica se a carta escolhida pelo jogador é \textit{Wild}, seja de côr ou naipe;
-		\item Verifica se a casa escolhida pelo utilizador está, de facto, ocupada;
-		\item Verifica se as regras referentes ao número, cores e naipes da sequência são cumpridas na linha;
-		\item Verifica se as regras referentes ao número, cores e naipes da sequência são cumpridas na coluna.
-	\end{itemize}
-
-	Acima encontra-se parte do predicado responsável pelas verificações mencionadas que garantem que todas as regras são cumpridas.
-
-	\subsubsection{Trocar cartas}
-
-	Ao optar por trocar cartas é dada oportunidade ao jogador para escolher quais as cartas (dentro daquelas que estão nesse momento na sua mão) que este pretende trocar. Após a escolha estas cartas passam para o fim do baralho e são repostas na mão por aquelas que estão imediatamente no topo do baralho.
-
-	\subsection{Avaliação do estado do Jogo}
-
-	Tendo em conta que nesta modalidade o jogo termina quando um dos jogadores termina o seu baralho, podemos avaliar o estado do jogo através do número de cartas restantes nos baralhos dos jogadores que são impressos nas jogadas.
-
-	\subsection{Final do Jogo}
-
-	O jogo termina mal um dos jogadores termine com o seu baralho, tendo sido bem sucedido em deixar todas as suas cartas no tabuleiro sem infringir nenhuma das regras. No final de cada jogada é feita a verificação de se o baralho do jogador está, ou não, vazia. No caso do baralho estar vazio termina o jogo imediatamente.
-
-	\newpage
-
-	\section{Interface com o Utilizador}
+	\section{Parte 2 - Configuração de Redes}
 
 	\clearpage
 
 	\section{Conclusões}
 
-	Este trabalho realizado no âmbito da Unidade Curricular de Programação em Lógica serviu positivamente para que ganhássemos bastantes conhecimentos ao nível da linguagem de PROLOG. Achamos que, tendo um pouco mais de tempo para a conclusão do trabalho, este seria concluído de melhor forma. Mesmo assim o balanço que fazemos é bastante positivo.
 
-	Surpreendeu-nos a dificuldade de algumas das regras exigidas por este jogo, bem como a necessidade de fazer um tabuleiro de forma dinâmica, no entanto, encaramos estas dificuldades como desafios que fizemos por superar e fizemo-lo com sucesso. Infelizmente não tivemos tempo para implementar o \textit{bot}, melhoria que proporíamos num futuro em que pudéssemos melhorá-lo.
 
 	%************************************************************************************************
+	\newpage
 
+	\section{Anexos}
+	
+	\subsection{Headers}
+
+	\subsubsection{conection.h}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 1 - conection.h}
+	\lstinputlisting{../ftpDownloader/conection.h}
+
+	\subsubsection{url.h}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 2 - url.h}
+	\lstinputlisting{../ftpDownloader/url.h}
+
+	\subsubsection{utilities.h}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 3 - utilities.h}
+	\lstinputlisting{../ftpDownloader/utilities.h}
+
+	\subsection{*.c files}
+
+	\subsubsection{main.c}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 4 - main.c}
+	\lstinputlisting{../ftpDownloader/main.c}
+
+	\subsubsection{conection.c}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 5 - conection.c}
+	\lstinputlisting{../ftpDownloader/conection.c}
+
+	\subsubsection{url.c}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 6 - url.c}
+	\lstinputlisting{../ftpDownloader/url.c}
+
+	\subsubsection{utilities.c}
+
+	\lstset{basicstyle=\ttfamily \color{black}\small,  title=Anexo 7 - utilities.c}
+	\lstinputlisting{../ftpDownloader/utilities.c}
+
+	\subsection{Makefile}
+
+	\lstset{
+   	language=[gnu] make,
+   	keywordstyle=\color{teal}\textbf,
+   	stringstyle=\color{blue},
+   	identifierstyle=\itshape,
+	title=Anexo 8 - Makefile
+	}
+	\lstinputlisting{./res/Makefile.txt}
 
 	\end{document}
