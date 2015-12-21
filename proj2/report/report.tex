@@ -153,6 +153,36 @@ Este relatório tem como objetivo explicar o segundo projeto da Unidade Curricul
 	Em caso de erro, para além da aplicação terminar é impresso na consola o erro em causa, de modo a que o utilizador tenha o máximo controlo possível sobre o sucedido.
 
 	\section{Parte 2 - Configuração de Redes}
+	
+	\subsection{Configuração de um IP de rede}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=0.45\linewidth]{exp1.png}
+  	\caption{Experiment 1}
+  	\label{fig:Experiment 1}
+	\end{center}
+	\end{figure}
+
+	Esta primeira experiência tem como objetivo configurar duas máquinas numa só rede e compreender o seu funcionamento. Foram então configurados os dois computadores \textbf{tux41} e \textbf{tux44} para que estes assumissem os endereços de \textbf{IP} de \textbf{172.16.40.1} e \textbf{172.16.40.254}, respetivamente.
+
+Para tal, utilizamos o comando \textbf{ifconfig}, atribuindo estes mesmos valores e ativando as portas \textbf{eth0} às quais foram ligados os cabos de rede.
+
+Esta rede foi também configurada no \textit{switch} como \textbf{vlan 40}.
+
+Apos a configuração, através do comando \textbf{ping} verificou-se que existia a ligação entre as duas máquinas. Após esta verificação foram apagadas todas as entradas na tabela \textbf{ARP} através do comando \textbf{arp -d 'ip address'}. Por fim repetiu-se o comando \textbf{ping} registando o processo através do programa \textit{wireshark}.
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp1_wireshark.png}
+  	\caption{Experiment 1 - log}
+  	\label{fig:Experiment 1 - log}
+	\end{center}
+	\end{figure}
+
+	Analisando o \textit{log} do \textit{wireshark} podemos verificar que, tendo apagado as entradas na tabela \textbf{ARP} é perguntado à rede qual o endereço \textbf{MAC} com um endereço de \textbf{IP} igual a \textbf{172.16.40.254}. Este computador responde com o seu endereço \textbf{MAC} e, a partir de aí, sempre que o primeiro faz um request \textbf{ICMP}, este é seguido de uma resposta do segundo. Verifica-se também que, como o endereço \textbf{MAC} do segundo se encontra na tabela \textbf{ARP} do primeiro, não é necessário haver mais nenhum \textbf{broadcast} como o da linha 5 do \textit{log} acima.
+
+	\subsection{Configuração de um IP de rede}
 
 	\clearpage
 
