@@ -168,21 +168,45 @@ Este relatório tem como objetivo explicar o segundo projeto da Unidade Curricul
 
 Para tal, utilizamos o comando \textbf{ifconfig}, atribuindo estes mesmos valores e ativando as portas \textbf{eth0} às quais foram ligados os cabos de rede.
 
-Esta rede foi também configurada no \textit{switch} como \textbf{vlan 40}.
-
 Apos a configuração, através do comando \textbf{ping} verificou-se que existia a ligação entre as duas máquinas. Após esta verificação foram apagadas todas as entradas na tabela \textbf{ARP} através do comando \textbf{arp -d 'ip address'}. Por fim repetiu-se o comando \textbf{ping} registando o processo através do programa \textit{wireshark}.
+
+	Analisando o \textit{log} do \textit{wireshark} da figura \ref{fig:Experiment 1 - log} nos Anexos, podemos verificar que, tendo apagado as entradas na tabela \textbf{ARP} é perguntado à rede qual o endereço \textbf{MAC} com um endereço de \textbf{IP} igual a \textbf{172.16.40.254}. Este computador responde com o seu endereço \textbf{MAC} e, a partir de aí, sempre que o primeiro faz um request \textbf{ICMP}, este é seguido de uma resposta do segundo. Verifica-se também que, como o endereço \textbf{MAC} do segundo se encontra na tabela \textbf{ARP} do primeiro, não é necessário haver mais nenhum \textbf{broadcast} como o da linha 5 do \textit{log} acima.
+
+	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
 
 	\begin{figure}[H]
 	\begin{center}
-  	\includegraphics[width=\linewidth]{exp1_wireshark.png}
-  	\caption{Experiment 1 - log}
-  	\label{fig:Experiment 1 - log}
+  	\includegraphics[width=0.8\linewidth]{exp2.png}
+  	\caption{Experiment 2}
+  	\label{fig:Experiment 2}
 	\end{center}
 	\end{figure}
 
-	Analisando o \textit{log} do \textit{wireshark} podemos verificar que, tendo apagado as entradas na tabela \textbf{ARP} é perguntado à rede qual o endereço \textbf{MAC} com um endereço de \textbf{IP} igual a \textbf{172.16.40.254}. Este computador responde com o seu endereço \textbf{MAC} e, a partir de aí, sempre que o primeiro faz um request \textbf{ICMP}, este é seguido de uma resposta do segundo. Verifica-se também que, como o endereço \textbf{MAC} do segundo se encontra na tabela \textbf{ARP} do primeiro, não é necessário haver mais nenhum \textbf{broadcast} como o da linha 5 do \textit{log} acima.
+	Esta experiência consiste na criação de duas \textit{vlan's} diferentes:
 
-	\subsection{Configuração de um IP de rede}
+	\begin{itemize}
+	\item \textit{VLAN 40} - \textit{172.16.40.0/24} -  à qual pertencem os computadores \textit{tux1} e \textit{tux4};
+	\item \textit{VLAN 41} - \textit{172.16.41.0/24} -  à qual pertence o computador \textit{tux2}.
+	\end{itemize}
+
+	De notar que no final da configuração das máquinas e do \textit{switch} o computador \textit{tux2} deixará de ter acesso aos computadores que pertencem à rede \textit{VLAN 40}, à qual não pertence.
+
+Para configurar os computadores da forma referida basta proceder do mesmo modo que se procedeu para a primeira experiência, mas desta vez fazê-lo no computador \textit{tux2} e atribuindo \textbf{172.16.41.1} como endereço de \textit{IP} (tendo em conta que os outros dois computadores continuam com a configuração da primeira experiência).
+
+Para configurar o \textit{switch} acede-se à sua consola através da aplicação \textit{gkterm} e corre-se os comandos especificados em anexo.
+
+	Estando os dois computadores na mesma rede, então, ao fazer \textbf{ping} do \textit{tux1} para o \textit{tux4}, não é enviado o pacote \textit{ARP} para saber o endereço \textit{MAC}, como se pode verificar na figura \ref{fig:Experiment 2 - Point 6}.
+
+	Pode também verificar-se, na análise das figuras \ref{fig:Experiment 2 - Point 9 - tux1}, \ref{fig:Experiment 2 - Point 9 - tux2}, \ref{fig:Experiment 2 - Point 9 - tux4}, \ref{fig:Experiment 2 - Point 10 - tux1}, \ref{fig:Experiment 2 - Point 10 - tux2} e \ref{fig:Experiment 2 - Point 10 - tux4} que cada \textit{vlan} tem um \textit{broadcast domain} diferente, tendo em conta que o \textit{tux2} não detetou o pacote enviado, como tal, conclui-se que a configuração destas reder foi feita da forma correta pois verifica-se a falta de comunicação entre as redes, como foi referido no início desta experiência. Nas primeiras três figuras foi feito um \textit{broadcast} na \textit{vlan 41} enquanto que nas últimas três foi feito na \textit{vlan 41}.
+
+
+	\subsection{Configuração de um \textit{router} em \textit{Linux}}
+
+	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
+
+	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
+
+	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
 
 	\clearpage
 
@@ -275,5 +299,81 @@ Apos a configuração, através do comando \textbf{ping} verificou-se que existi
 	
 	\lstset{title=Anexo 13 - tux4 Final Configuration}
 	\lstinputlisting{../RCOM_experiments/RCOM-exp4/tux4/exp3_tux4.sh}
+
+	\subsection{Wireshark Logs}
+
+	\subsubsection{Experiência 1}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp1_wireshark.png}
+  	\caption{Experiment 1 - log}
+  	\label{fig:Experiment 1 - log}
+	\end{center}
+	\end{figure}
+
+	\subsubsection{Experiência 2}
+	
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_6_t2.png}
+  	\caption{Experiment 2 - Point 6}
+  	\label{fig:Experiment 2 - Point 6}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_9_tux1.png}
+  	\caption{Experiment 2 - Point 9 - tux1}
+  	\label{fig:Experiment 2 - Point 9 - tux1}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_9_tux2.png}
+  	\caption{Experiment 2 - Point 9 - tux2}
+  	\label{fig:Experiment 2 - Point 9 - tux2}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_9_tux4.png}
+  	\caption{Experiment 2 - Point 9 - tux4}
+  	\label{fig:Experiment 2 - Point 9 - tux4}
+	\end{center}
+	\end{figure}
+
+		\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_10_tux1.png}
+  	\caption{Experiment 2 - Point 10 - tux1}
+  	\label{fig:Experiment 2 - Point 10 - tux1}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_10_tux2.png}
+  	\caption{Experiment 2 - Point 10 - tux2}
+  	\label{fig:Experiment 2 - Point 10 - tux2}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp2_10_tux4.png}
+  	\caption{Experiment 2 - Point 10 - tux4}
+  	\label{fig:Experiment 2 - Point 10 - tux4}
+	\end{center}
+	\end{figure}
+
+	\subsubsection{Experiência 3}
+	\subsubsection{Experiência 4}
+	\subsubsection{Experiência 5}
+	\subsubsection{Experiência 6}
+
 
 	\end{document}
