@@ -266,6 +266,19 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 	\end{center}
 	\end{figure}
 
+	Esta experiência consiste apenas em adicionar um \textit{DNS}, como tal, basta colocar duas linhas no ficheiro \textbf{resolv.conf} situado no diretório \textbf{/etc} nos computadores com o sistema operativo em \textit{Linux}. Este ficheiro ficou então com as linhas abaixo:
+
+	\lstset{
+	title=resolf.conf
+	}
+
+	\begin{lstlisting}
+	search lixa.netlab.fe.up.pt
+	nameserver 172.16.1.1
+	\end{lstlisting}
+
+	Por fim foi testada a funcionalidade desta alteração acedendo, através do \textit{browser} a um \textit{website} o que, como podemos verificar na figura \ref{fig:Experiment 5 - tux1} se verificou sem problemas.
+
 	\subsection{Conexões \textit{TCP}}
 
 	\begin{figure}[H]
@@ -275,6 +288,10 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
   	\label{fig:Experiment 6}
 	\end{center}
 	\end{figure}
+
+	Esta experiência tinha como objetivo juntar as duas partes deste trabalho, pondo em prática a aplicação de \textit{download} desenvolvida na Parte 1 deste trabalho na rede cobfigurada ao longo destas experiências. A aplicação foi testada em modo anónimo e não anónimo, com ficheiros de imagem e de vídeo sendo que o ficheiro testado com maior tamanho tinha cerca de 200Mb. Foi também testada esta aplicação em simultâneo no \textit{tux1} e no \textit{tux2}, não tendo ocorrido qualquer tipo de problema na transferência do ficheiro.
+
+	Podemos ver o gráfico de pacotes transferidos em função do tempo durante a transferência realizada pelo \textit{tux1} na figura \ref{fig:Experiment 6 - tux1}.
 
 	\clearpage
 
@@ -480,6 +497,49 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 	\end{figure}
 
 	\subsubsection{\textit{DNS}}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp5_tux1.png}
+  	\caption{Experiment 5 - tux1}
+  	\label{fig:Experiment 5 - tux1}
+	\end{center}
+	\end{figure}
+
 	\subsubsection{Conexões \textit{TCP}}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp6_tux1.png}
+  	\caption{Experiment 6 - tux1}
+  	\label{fig:Experiment 6 - tux1}
+	\end{center}
+	\end{figure}
+
+	\subsection{Application Screenshots}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{ftp1.png}
+  	\caption{Downloader output - DEBUG mode ON}
+  	\label{fig:Downloader output - DEBUG mode ON}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{ftp2.png}
+  	\caption{Downloader output - DEBUG mode OFF}
+  	\label{fig:Downloader output - DEBUG mode OFF}
+	\end{center}
+	\end{figure}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=0.2\linewidth]{ftp3.png}
+  	\caption{Downloaded file's content}
+  	\label{fig:Downloaded file's content}
+	\end{center}
+	\end{figure}
 
 	\end{document}
