@@ -12,6 +12,8 @@
 	\usepackage{xcolor}
 	\usepackage[left=1in,right=1in,top=1in,bottom=.8in]{geometry}
 	\usepackage{float}
+	\usepackage{titlesec}
+	\usepackage{csvtools}
 
 \graphicspath{ {res/} }
 
@@ -212,5 +214,36 @@ Este relatório tem como objetivo explicar o segundo projeto da Unidade Curricul
 	title=Anexo 8 - Makefile
 	}
 	\lstinputlisting{./res/Makefile.txt}
+
+	\subsection{Configuration Scripts}
+
+	\subsubsection{Router Configuration}
+	
+	\lstset{title=Anexo 9 - Router Configuration}
+	\lstinputlisting{./res/router.txt}
+
+	\clearpage
+
+	\subsubsection{Switch Configuration}
+	
+	\lstset{title=Anexo 10 - Switch Configuration}
+	\lstinputlisting{./res/switch.txt}
+
+	\clearpage
+
+	\subsubsection{tux1 Configuration}
+	
+	\lstset{title=Anexo 11 - tux1 Final Configuration}
+	\lstinputlisting{../RCOM_experiments/RCOM-exp4/tux1/exp4_tux1.sh}
+
+	\subsubsection{tux2 Configuration}
+	
+	\lstset{title=Anexo 12 - tux2 Final Configuration}
+	\lstinputlisting{../RCOM_experiments/RCOM-exp6/tux2/exp4_tux2(bancada1).sh}
+
+	\subsubsection{tux4 Configuration}
+	
+	\lstset{title=Anexo 13 - tux4 Final Configuration}
+	\lstinputlisting{../RCOM_experiments/RCOM-exp4/tux4/exp3_tux4.sh}
 
 	\end{document}
