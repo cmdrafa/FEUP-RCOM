@@ -72,16 +72,14 @@
 
 	\newpage
 
+	\tableofcontents	
+
+	\newpage
+
 	\section{Sumário}
 	\normalsize
 
 Este relatório tem como objetivo explicar o segundo projeto da Unidade Curricular de Redes de Computadores bem como analisar os resultados obtidos na realização das experiências especificadas no enunciado do mesmo.
-
-	\newpage
-
-	\tableofcontents	
-
-	\newpage
 
 	\section{Introdução}
 
@@ -202,11 +200,81 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 
 	\subsection{Configuração de um \textit{router} em \textit{Linux}}
 
-	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=0.8\linewidth]{exp3.png}
+  	\caption{Experiment 3}
+  	\label{fig:Experiment 3}
+	\end{center}
+	\end{figure}
 
-	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
+	Esta experiência consiste na configuração do computador \textit{tux4} como \textit{router} por forma a ligar as duas \textit{vlan's} existentes:
 
-	\subsection{Configuração de duas redes \textit{LAN} virtuais num \textit{switch}}
+	\begin{itemize}
+	\item \textbf{172.16.40.0/24} - \textit{vlan 40};
+	\item \textbf{172.16.41.0/24} - \textit{vlan 41}.
+	\end{itemize}
+
+	Em primeiro lugar ativa-se a porta \textit{eth1} do \textit{tux4} i liga-se ao \textit{switch}. Esta porta será a que será ligada à \textit{vlan 41}. Configura-se esta mesma porta com o endereço \textit{IP} \textbf{172.16.41.253/24}. Sendo este computadro aquele que pretendemos que sirva de \textit{router}, é necessário ativar o reencaminhamento de \textit{IP's} através do comando:
+
+	\lstset{
+   	language=[gnu] make,
+   	keywordstyle=\color{teal}\textbf,
+   	stringstyle=\color{blue},
+   	identifierstyle=\itshape,
+	 basicstyle = \ttfamily \color{black} \small,
+	title=Shell Command
+	}
+	
+	\begin{lstlisting}	
+	echo 1 > /proc/sys/net/ipv4/ip_forward
+	\end{lstlisting}
+
+	Por fim, adicionou-se as rotas necessárias no \textit{tux1} e no \textit{tux2} por forma a que estes, através do \textit{tux4} pudessem aceder à rede a que não pertencem. Estas rotas forma adicionadas utilizando o comando:
+
+	\begin{lstlisting}
+	route add -net _ _
+	\end{lstlisting}
+
+	Como é possível analisar através da figura \ref{fig:Experiment 3 - tux1}, agora é possível a comunicação entre qualquer uma das três máquinas.
+
+	\subsection{Configuração de um \textit{router} comercial implementando \textit{NAT}}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=0.8\linewidth]{exp4.png}
+  	\caption{Experiment 4}
+  	\label{fig:Experiment 4}
+	\end{center}
+	\end{figure}
+
+	Esta experiência tem como objetivo a configuração do \textit{CISCO} dentro da rede 41 de forma a que tanto os computadores na \textit{vlan40} como na \textit{vlan41} tenham acesso à Internet.
+
+	Para configurar o router, depois de fazer \textit{login} na linha de comandos corre-se o \textit{script} do Anexo 9. Os comandos referidos em anexo começam por configurar duas interfaces do \textit{router}, atribuindo corretamente as configurações \textit{NAT}. A configuração correta do \textit{NAT} é essencial pois a falta desta poderia resultar em falta de acesso à Internet em qualquer um dos computadores pois, como sabemos, \textit{NAT} tem a função de traduzir endereços, resultando neste caso na tradução do endereço de sub-rede de cada computador no endereço do \textit{router} comercial.
+	
+	Depois de permitir que os computadores das redes criadas tenham acesso, é configurada uma rota predefinida para o endereço da Internet. Da mesma forma é adicionada aos computadores a rota predefinida para o endereço \textbf{172.16.41.254}, endereço do \textit{router} comercial.
+
+	Como é possível verificar na figura \ref{fig:Experiment 4 - tux1}, mesmo o computador da rede 10 tem acesso ao \textit{router} comercial.
+
+	\subsection{\textit{DNS}}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=0.8\linewidth]{exp5.png}
+  	\caption{Experiment 5}
+  	\label{fig:Experiment 5}
+	\end{center}
+	\end{figure}
+
+	\subsection{Conexões \textit{TCP}}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=0.8\linewidth]{exp6.png}
+  	\caption{Experiment 6}
+  	\label{fig:Experiment 6}
+	\end{center}
+	\end{figure}
 
 	\clearpage
 
@@ -218,6 +286,27 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 	\newpage
 
 	\section{Anexos}
+
+\lstset{
+  language=C,
+  tabsize=4,
+  captionpos=b,
+  numbers=left,
+  frame=single,
+  breaklines=true,
+  rulecolor=\color{black},
+  title=Struct linkLayer,
+  commentstyle=\color{codeGreen},
+  backgroundcolor=\color{codeBackground},
+  numberstyle=\color{gray},
+  keywordstyle=\color{blue} \textbf,%otherkeywords={xdata},
+  keywords=[2]{xdata},
+  keywordstyle=[2]\color{red}\textbf,
+  identifierstyle=\color{black},
+  stringstyle=\color{red}\ttfamily,
+  basicstyle = \ttfamily \color{black} \footnotesize,
+  showstringspaces=false ,
+}
 	
 	\subsection{Headers}
 
@@ -302,7 +391,7 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 
 	\subsection{Wireshark Logs}
 
-	\subsubsection{Experiência 1}
+	\subsubsection{Configuração de um \textit{IP} de rede}
 
 	\begin{figure}[H]
 	\begin{center}
@@ -312,7 +401,7 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 	\end{center}
 	\end{figure}
 
-	\subsubsection{Experiência 2}
+	\subsubsection{Configuração de duas Redes \textit{LAN} virtuais num \textit{switch}}
 	
 	\begin{figure}[H]
 	\begin{center}
@@ -370,10 +459,27 @@ Para configurar o \textit{switch} acede-se à sua consola através da aplicaçã
 	\end{center}
 	\end{figure}
 
-	\subsubsection{Experiência 3}
-	\subsubsection{Experiência 4}
-	\subsubsection{Experiência 5}
-	\subsubsection{Experiência 6}
+	\subsubsection{Configuração de um \textit{router} em \textit{Linux}}
 
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp3_tux1.png}
+  	\caption{Experiment 3 - tux1}
+  	\label{fig:Experiment 3 - tux1}
+	\end{center}
+	\end{figure}
+
+	\subsubsection{Configuração de um \textit{router} comercial implementando \textit{NAT}}
+
+	\begin{figure}[H]
+	\begin{center}
+  	\includegraphics[width=\linewidth]{exp4_tux1.png}
+  	\caption{Experiment 4 - tux1}
+  	\label{fig:Experiment 4 - tux1}
+	\end{center}
+	\end{figure}
+
+	\subsubsection{\textit{DNS}}
+	\subsubsection{Conexões \textit{TCP}}
 
 	\end{document}
